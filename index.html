@@ -1104,7 +1104,10 @@
             if (!response.ok) {
                 const errorBody = await response.text();
                 console.error("Serverless Function Error:", errorBody);
-                throw new Error(`Serverless function failed with status ${response.status}`);
+                // --- CHANGE: Pass the detailed error message back ---
+                // Instead of a generic error, throw the specific error from the server
+                throw new Error(errorBody);
+                // --- END OF CHANGE ---
             }
             
             return response.json(); // It will return the same JSON structure from Google
@@ -1160,8 +1163,25 @@
                 await getDialogueResponse();
             } catch (error) {
                 console.error("Error getting dialogue response:", error);
+                
+                // --- CHANGE: Display the detailed error message in the chat ---
+                let displayError = "Entschuldigung, ich habe ein Problem. Bitte versuche es noch einmal.";
+                // 'error.message' will now contain the JSON string from our function
+                try {
+                    // Try to parse the JSON error from our serverless function
+                    const errorJson = JSON.parse(error.message);
+                    if (errorJson && errorJson.error) {
+                        displayError = `Fehler: ${errorJson.error}`;
+                    }
+                } catch(e) {
+                    // Fallback if the error message wasn't JSON
+                    // This might happen on a network failure
+                    displayError = `Fehler: ${error.message}`;
+                }
+                
                 // Add error message to UI, but not to state history to avoid resending
-                addMessageToChat('tutor', "Entschuldigung, ich habe ein Problem. Bitte versuche es noch einmal.", false); 
+                addMessageToChat('tutor', displayError, false);
+                // --- END OF CHANGE ---
             } finally {
                 dialogueLoading.classList.add('hidden');
                 sendBtn.disabled = false;
