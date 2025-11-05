@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nicos Weg A1 - Lernkarten</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Nunito font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Nunito', sans-serif;
+            /* Vibrant gradient background */
+            background: linear-gradient(135deg, #f5f3ff 0%, #f3f4f6 100%);
+        }
+        
+        /* 3D Card Flip */
+        .perspective { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .is-flipped { transform: rotateY(180deg); }
+        .rotate-y-180 { transform: rotateY(180deg); }
+
+        /* Youth-friendly Button Style */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px; /* rounded-full */
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+            transform: translateZ(0); /* For GPU acceleration */
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.12);
+        }
+        .btn-primary {
+            background-image: linear-gradient(to right, #8b5cf6, #6366f1);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-image: linear-gradient(to right, #a78bfa, #818cf8);
+        }
+        .btn-secondary {
+            background-color: white;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+        }
+        .btn-secondary:hover {
+            background-color: #f5f3ff;
+        }
+        .btn-nav {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            color: #4b5563; /* gray-600 */
+            white-space: nowrap; /* Prevent wrapping on mobile */
+        }
+        .btn-nav.tab-active {
+            background-color: #eef2ff; /* indigo-50 */
+            color: #4f46e5; /* indigo-700 */
+        }
+
+        /* Custom Tab Navigation */
+        #tab-nav-container {
+            background-color: #ffffff;
+            border-radius: 9999px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.05);
+            /* Allow scrolling on small screens */
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+        #tab-nav-container::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
+        }
+
+        /* Loading spinner */
+        .loader {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom scrollbar for chat */
+        #chat-window {
+            scroll-behavior: smooth;
+        }
+        #chat-window::-webkit-scrollbar { width: 6px; }
+        #chat-window::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        #chat-window::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+        #chat-window::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
+
+    </style>
+</head>
+<body class="text-gray-900 min-h-screen p-4 md:p-8">
+
+    <div id="app" class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">
+                Nicos Weg A1
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 mt-1">Dein Lernbegleiter</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex justify-center mb-8 px-2">
+            <div id="tab-nav-container" class="gap-2">
+                <button id="tab-flashcards" class="btn-nav">
+                    🧠 Lernkarten
+                </button>
+                <button id="tab-grammar" class="btn-nav">
+                    📚 Grammatik
+                </button>
+                <button id="tab-dialogue" class="btn-nav">
+                    💬 Üben
+                </button>
+            </div>
+        </nav>
+
+        <!-- Content Area -->
+        <main id="content-area">
+
+            <!-- ======================= -->
+            <!--   Flashcard View        -->
+            <!-- ======================= -->
+            <div id="flashcard-view" class="">
+                <!-- Deck Selector -->
+                <div class="mb-6 max-w-sm mx-auto">
+                    <label for="deck-selector" class="block text-sm font-medium text-gray-700 mb-2 ml-3">Deck auswählen:</label>
+                    <select id="deck-selector" class="mt-1 block w-full py-3 px-5 border-gray-300 bg-white rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        <option value="all">Alle Karten (Wortschatz & Sätze)</option>
+                        <option value="vocab">Nur Wortschatz</option>
+                        <option value="phrase">Nur Sätze</option>
+                    </select>
+                </div>
+
+                <!-- Card Scene -->
+                <div id="card-scene" class="perspective w-full h-72 md:h-80 cursor-pointer">
+                    <div id="card" class="relative w-full h-full transition-transform duration-700 transform-style-3d rounded-2xl">
+                        
+                        <!-- Card Front (German) -->
+                        <div id="card-front" class="absolute w-full h-full backface-hidden bg-white rounded-2xl shadow-xl border-2 border-white p-6 flex flex-col justify-center items-center text-center">
+                            <span class="absolute top-4 left-4 text-sm font-bold text-indigo-600 uppercase tracking-wider" id="card-type-front"></span>
+                            <p class="text-3xl md:text-4xl font-bold text-gray-800" id="card-german"></p>
+                            <span class="absolute bottom-4 right-4 text-xs text-gray-500" id="card-source-front"></span>
+                        </div>
+                        
+                        <!-- Card Back (English) -->
+                        <div id="card-back" class="absolute w-full h-full backface-hidden rotate-y-180 bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl shadow-xl border-2 border-white p-6 flex flex-col justify-between items-center text-center">
+                            
+                            <!-- Top Type -->
+                            <span class="absolute top-4 left-4 text-sm font-bold text-indigo-600 uppercase tracking-wider" id="card-type-back"></span>
+                            
+                            <!-- Main Content -->
+                            <div class="flex-grow flex flex-col justify-center items-center w-full">
+                                <p class="text-3xl md:text-4xl font-bold text-gray-800" id="card-english"></p>
+                            </div>
+                    
+                            <!-- Bottom Source -->
+                            <span class="absolute bottom-4 right-4 text-xs text-gray-500" id="card-source-back"></span>
+                        </div>
+                    </div>
+                </div>
+                <p id="no-cards-msg" class="text-center text-gray-500 h-72 md:h-80 flex justify-center items-center hidden">Keine Karten in diesem Deck.</p>
+
+                <!-- Progress & Controls -->
+                <div class="flex justify-between items-center mt-6 max-w-lg mx-auto">
+                    <button id="prev-btn" class="btn btn-secondary !px-4 !py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <p id="progress-text" class="text-gray-600 font-bold text-lg">1 / 20</p>
+                    <button id="next-btn" class="btn btn-secondary !px-4 !py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col md:flex-row justify-center items-center gap-4 mt-6 max-w-lg mx-auto">
+                    <button id="shuffle-btn" class="btn btn-primary w-full md:w-auto">
+                        Deck mischen
+                    </button>
+                </div>
+            </div>
+
+            <!-- ======================= -->
+            <!--    Grammar View         -->
+            <!-- ======================= -->
+            <div id="grammar-view" class="hidden">
+                <div class="flex flex-col md:flex-row md:gap-8">
+                    <!-- Grammar Topic List -->
+                    <div class="md:w-1/3 mb-6 md:mb-0">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">A1 Grammatik</h2>
+                        <div id="grammar-list" class="space-y-2">
+                            <!-- JS will populate this -->
+                        </div>
+                    </div>
+                    
+                    <!-- Grammar Content -->
+                    <div class="md:w-2/3">
+                        <div id="grammar-content-wrapper" class="bg-white p-5 md:p-8 rounded-2xl shadow-lg sticky top-8 border border-gray-200 min-h-[300px]">
+                            <!-- Placeholder -->
+                            <div id="grammar-placeholder" class="text-center text-gray-500 py-12">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                                <h3 class="mt-2 text-lg font-bold text-gray-900">Thema auswählen</h3>
+                                <p class="mt-1 text-sm text-gray-500">Wähle ein Thema aus der Liste.</p>
+                            </div>
+                            
+                            <!-- Main Grammar Content (from data) -->
+                            <div id="grammar-content" class="hidden prose prose-indigo max-w-none">
+                                <!-- JS will populate this -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================= -->
+            <!--    Dialogue View        -->
+            <!-- ======================= -->
+            <div id="dialogue-view" class="hidden">
+                <div class="bg-white p-5 md:p-8 rounded-2xl shadow-lg border border-gray-200 max-w-lg mx-auto">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Dialog üben (A1)</h2>
+                    
+                    <!-- Chat Window -->
+                    <div id="chat-window" class="h-96 w-full border border-gray-200 rounded-lg p-4 overflow-y-auto bg-gray-50 space-y-4 mb-4">
+                        <!-- Initial Tutor Message (set by JS) -->
+                    </div>
+
+                    <!-- Input Area -->
+                    <form id="chat-form" class="flex gap-3">
+                        <input type="text" id="user-input" class="flex-grow block w-full py-3 px-5 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Deine Antwort...">
+                        <button type="submit" id="send-btn" class="btn btn-primary !px-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
+                        </button>
+                    </form>
+                    
+                    <!-- Loading Indicator (for AI response) -->
+                    <div id="dialogue-loading" class="hidden text-center pt-4">
+                        <svg class="animate-spin h-5 w-5 text-indigo-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-sm text-gray-500">Tutor tippt...</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+
+    <script>
+        // =================================================================
+        // DOM ELEMENTS
+        // =================================================================
+        const app = document.getElementById('app');
+
+        // View and Tab elements
+        const tabFlashcards = document.getElementById('tab-flashcards');
+        const tabGrammar = document.getElementById('tab-grammar');
+        const tabDialogue = document.getElementById('tab-dialogue');
+        const flashcardView = document.getElementById('flashcard-view');
+        const grammarView = document.getElementById('grammar-view');
+        const dialogueView = document.getElementById('dialogue-view');
+        const deckSelector = document.getElementById('deck-selector');
+        
+        // Flashcard elements
+        const cardScene = document.getElementById('card-scene');
+        const card = document.getElementById('card');
+        const cardFront = document.getElementById('card-front');
+        const cardBack = document.getElementById('card-back');
+        const cardTypeFront = document.getElementById('card-type-front');
+        const cardGerman = document.getElementById('card-german');
+        const cardSourceFront = document.getElementById('card-source-front');
+        const cardTypeBack = document.getElementById('card-type-back');
+        const cardEnglish = document.getElementById('card-english');
+        const cardSourceBack = document.getElementById('card-source-back');
+        const noCardsMsg = document.getElementById('no-cards-msg');
+        
+        // Control elements
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressText = document.getElementById('progress-text');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+
+        // Grammar elements
+        const grammarList = document.getElementById('grammar-list');
+        const grammarContent = document.getElementById('grammar-content');
+        const grammarPlaceholder = document.getElementById('grammar-placeholder');
+
+        // Dialogue (Chat) elements
+        const chatWindow = document.getElementById('chat-window');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const dialogueLoading = document.getElementById('dialogue-loading');
+        
+        // =================================================================
+        // DATA
+        // =================================================================
+        // (Full nicoWegData object is here...)
+        const nicoWegData = {
+            vocabulary: [
+                // Folge 1: Greetings & Intro (Added back, was missing)
+                { german: "Hallo", english: "Hello", source: "Folge 1", type: "vocab" },
+                { german: "Guten Tag", english: "Hello / Good day", source: "Folge 1", type: "phrase" },
+                { german: "Wie geht's?", english: "How are you? (informal)", source: "Folge 1", type: "phrase" },
+                { german: "Es geht.", english: "It's okay. / So-so.", source: "Folge 1", type: "phrase" },
+                { german: "Gut, danke.", english: "Good, thanks.", source: "Folge 1", type: "phrase" },
+                { german: "Auf Wiedersehen", english: "Goodbye", source: "Folge 1", type: "phrase" },
+                { german: "Tschüss", english: "Bye (informal)", source: "Folge 1", type: "vocab" },
+                { german: "heißen", english: "to be called", source: "Folge 1", type: "vocab" },
+                { german: "Wie heißt du?", english: "What is your name? (informal)", source: "Folge 1", type: "phrase" },
+                { german: "Ich heiße...", english: "My name is...", source: "Folge 1", type: "phrase" },
+                { german: "sein", english: "to be", source: "Folge 1", type: "vocab" },
+                { german: "Ich bin...", english: "I am...", source: "Folge 1", type: "phrase" },
+                { german: "der Name, -n", english: "the name, -s", source: "Folge 1", type: "vocab" },
+                { german: "kommen", english: "to come", source: "Folge 1", type: "vocab" },
+                { german: "aus", english: "from", source: "Folge 1", type: "vocab" },
+                { german: "Spanien", english: "Spain", source: "Folge 1", type: "vocab" },
+                { german: "Deutschland", english: "Germany", source: "Folge 1", type: "vocab" },
+                { german: "Ich komme aus...", english: "I come from...", source: "Folge 1", type: "phrase" },
+                { german: "Sehr erfreut.", english: "Pleased to meet you.", source: "Folge 1", type: "phrase" },
+        
+                // Folge 2-3: At the Airport, Police
+                { german: "der Flughafen, -", english: "the airport, -s", source: "Folge 2", type: "vocab" },
+                { german: "der Bus, -se", english: "the bus, -es", source: "Folge 2", type: "vocab" },
+                { german: "die Tasche, -n", english: "the bag, -s", source: "Folge 2", type: "vocab" },
+                { german: "sprechen", english: "to speak", source: "Folge 2", type: "vocab" },
+                { german: "Woher kommst du?", english: "Where do you come from? (informal)", source: "Folge 2", type: "phrase" },
+                { german: "Ich spreche...", english: "I speak...", source: "Folge 2", type: "phrase" },
+                { german: "die Polizei", english: "the police (no plural)", source: "Folge 3", type: "vocab" },
+                { german: "der Pass, -e", english: "the passport, -s", source: "Folge 3", type: "vocab" },
+                { german: "suchen", english: "to look for, to search", source: "Folge 3", type: "vocab" },
+                { german: "finden", english: "to find", source: "Folge 3", type: "vocab" },
+                { german: "Das ist...", english: "That is... / This is...", source: "Folge 3", type: "phrase" },
+                { german: "Ich suche...", english: "I am looking for...", source: "Folge 3", type: "phrase" },
+                { german: "Ich habe...", english: "I have...", source: "Folge 3", type: "phrase" },
+                { german: "Haben Sie...?", english: "Do you have...? (formal)", source: "Folge 3", type: "phrase" },
+                { german: "verloren", english: "lost", source: "Folge 3", type: "vocab" },
+                { german: "Ich habe meine Tasche verloren.", english: "I have lost my bag.", source: "Folge 3", type: "phrase" },
+                
+                // Folge 4-5: Address & Family
+                { german: "die Adresse, -n", english: "the address, -es", source: "Folge 4", type: "vocab" },
+                { german: "die Straße, -n", english: "the street, -s", source: "Folge 4", type: "vocab" },
+                { german: "die Hausnummer, -n", english: "the house number, -s", source: "Folge 4", type: "vocab" },
+                { german: "wohnen", english: "to live, to reside", source: "Folge 4", type: "vocab" },
+                { german: "Wo wohnst du?", english: "Where do you live? (informal)", source: "Folge 4", type: "phrase" },
+                { german: "Was ist deine Adresse?", english: "What is your address?", source: "Folge 4", type: "phrase" },
+                { german: "die Familie, -n", english: "the family, -ies", source: "Folge 5", type: "vocab" },
+                { german: "der Bruder, -", english: "the brother, -s", source: "Folge 5", type: "vocab" },
+                { german: "die Schwester, -n", english: "the sister, -s", source: "Folge 5", type: "vocab" },
+                { german: "die Eltern", english: "the parents (plural only)", source: "Folge 5", type: "vocab" },
+                { german: "der Vater, -", english: "the father, -s", source: "Folge 5", type: "vocab" },
+                { german: "die Mutter, -", english: "the mother, -s", source: "Folge 5", type: "vocab" },
+                { german: "der Sohn, -e", english: "the son, -s", source: "Folge 5", type: "vocab" },
+                { german: "die Tochter, -", english: "the daughter, -s", source: "Folge 5", type: "vocab" },
+                { german: "die Geschwister", english: "the siblings (plural only)", source: "Folge 5", type: "vocab" },
+                { german: "Haben Sie Kinder?", english: "Do you have children? (formal)", source: "Folge 5", type: "phrase" },
+                { german: "Hast du Geschwister?", english: "Do you have siblings? (informal)", source: "Folge 5", type: "phrase" },
+                { german: "Das ist mein/meine...", english: "This is my...", source: "Folge 5", type: "phrase" },
+                { german: "verheiratet", english: "married", source: "Folge 5", type: "vocab" },
+                { german: "ledig", english: "single", source: "Folge 5", type: "vocab" },
+                { german: "Bist du verheiratet?", english: "Are you married?", source: "Folge 5", type: "phrase" },
+
+                // Folge 6-7: Apartment & Money
+                { german: "die Wohnung, -en", english: "the apartment, -s", source: "Folge 6", type: "vocab" },
+                { german: "das Zimmer, -", english: "the room, -s", source: "Folge 6", type: "vocab" },
+                { german: "die Küche, -n", english: "the kitchen, -s", source: "Folge 6", type: "vocab" },
+                { german: "das Bad, -er", english: "the bathroom, -s", source: "Folge 6", type: "vocab" },
+                { german: "das Geld", english: "the money (no plural)", source: "Folge 7", type: "vocab" },
+                { german: "kosten", english: "to cost", source: "Folge 7", type: "vocab" },
+                { german: "der Euro, -s", english: "the Euro, -s", source: "Folge 7", type: "vocab" },
+                { german: "teuer", english: "expensive", source: "Folge 7", type: "vocab" },
+                { german: "billig", english: "cheap", source: "Folge 7", type: "vocab" },
+                { german: "Wie viel kostet...?", english: "How much does... cost?", source: "Folge 7", type: "phrase" },
+                { german: "Das kostet...", english: "That costs...", source: "Folge 7", type: "phrase" },
+                { german: "Ich brauche...", english: "I need...", source: "Folge 7", type: "phrase" },
+                { german: "der Schlüssel, -", english: "the key, -s", source: "Folge 6", type: "vocab" },
+                { german: "die Miete, -n", english: "the rent, -s", source: "Folge 7", type: "vocab" },
+                { german: "Wie hoch ist die Miete?", english: "How high is the rent?", source: "Folge 7", type: "phrase" },
+                
+                // Folge 8: Food & Drink
+                { german: "essen", english: "to eat", source: "Folge 8", type: "vocab" },
+                { german: "trinken", english: "to drink", source: "Folge 8", type: "vocab" },
+                { german: "der Apfel, -", english: "the apple, -s", source: "Folge 8", type: "vocab" },
+                { german: "das Brot, -e", english: "the bread, -s", source: "Folge 8", type: "vocab" },
+                { german: "die Milch", english: "the milk (no plural)", source: "Folge 8", type: "vocab" },
+                { german: "das Wasser", english: "the water", source: "Folge 8", type: "vocab" },
+                { german: "der Kaffee", english: "the coffee", source: "Folge 8", type: "vocab" },
+                { german: "der Tee", english: "the tea", source: "Folge 8", type: "vocab" },
+                { german: "der Saft, -e", english: "the juice, -s", source: "Folge 8", type: "vocab" },
+                { german: "das Gemüse", english: "the vegetables", source: "Folge 8", type: "vocab" },
+                { german: "das Obst", english: "the fruit", source: "Folge 8", type: "vocab" },
+                { german: "Ich habe Hunger.", english: "I am hungry.", source: "Folge 8", type: "phrase" },
+                { german: "Ich habe Durst.", english: "I am thirsty.", source: "Folge 8", type: "phrase" },
+                { german: "Was isst du gern?", english: "What do you like to eat?", source: "Folge 8", type: "phrase" },
+                { german: "Ich esse gern...", english: "I like to eat...", source: "Folge 8", type: "phrase" },
+                { german: "mögen", english: "to like", source: "Folge 8", type: "vocab" },
+                { german: "Ich mag...", english: "I like...", source: "Folge 8", type: "phrase" },
+                { german: "schmecken", english: "to taste", source: "Folge 8", type: "vocab" },
+                { german: "Das schmeckt gut.", english: "That tastes good.", source: "Folge 8", type: "phrase" },
+
+                // Folge 9-10: Time & Health
+                { german: "der Termin, -e", english: "the appointment, -s", source: "Folge 9", type: "vocab" },
+                { german: "die Uhr, -en", english: "the clock, -s / o'clock", source: "Folge 9", type: "vocab" },
+                { german: "Wie spät ist es?", english: "What time is it?", source: "Folge 9", type: "phrase" },
+                { german: "Es ist... Uhr.", english: "It is... o'clock.", source: "Folge 9", type: "phrase" },
+                { german: "der Arzt, -e", english: "the doctor (m.), -s", source: "Folge 10", type: "vocab" },
+                { german: "die Ärztin, -nen", english: "the doctor (f.), -s", source: "Folge 10", type: "vocab" },
+                { german: "krank", english: "sick", source: "Folge 10", type: "vocab" },
+                { german: "der Körper, -", english: "the body, -ies", source: "Folge 10", type: "vocab" },
+                { german: "der Kopf, -e", english: "the head, -s", source: "Folge 10", type: "vocab" },
+                { german: "der Arm, -e", english: "the arm, -s", source: "Folge 10", type: "vocab" },
+                { german: "das Bein, -e", english: "the leg, -s", source: "Folge 10", type: "vocab" },
+                { german: "der Bauch, -e", english: "the stomach, -s", source: "Folge 10", type: "vocab" },
+                { german: "der Schmerz, -en", english: "the pain, -s", source: "Folge 10", type: "vocab" },
+                { german: "Ich habe Kopfschmerzen.", english: "I have a headache.", source: "Folge 10", "type": "phrase" },
+                { german: "Mir tut... weh.", english: "My... hurts.", source: "Folge 10", type: "phrase" },
+                { german: "Was fehlt Ihnen?", english: "What's wrong? (formal, to patient)", source: "Folge 10", type: "phrase" },
+                { german: "Gute Besserung!", english: "Get well soon!", source: "Folge 10", type: "phrase" },
+                { german: "der Hals, -e", english: "the throat, -s", source: "Folge 10", type: "vocab" },
+                { german: "der Rücken, -", english: "the back, -s", source: "Folge 10", "type": "vocab" },
+                { german: "Ich habe Halsschmerzen.", english: "I have a sore throat.", source: "Folge 10", "type": "phrase" },
+
+                // Folge 11-12: Work & Daily Routine
+                { german: "arbeiten", english: "to work", source: "Folge 11", type: "vocab" },
+                { german: "der Beruf, -e", english: "the profession, -s", source: "Folge 11", type: "vocab" },
+                { german: "Was sind Sie von Beruf?", english: "What is your profession? (formal)", source: "Folge 11", type: "phrase" },
+                { german: "Ich bin...", english: "I am... (profession)", source: "Folge 11", type: "phrase" },
+                { german: "der Kellner, -", english: "the waiter, -s", source: "Folge 11", type: "vocab" },
+                { german: "die Kellnerin, -nen", english: "the waitress, -es", source: "Folge 11", type: "vocab" },
+                { german: "der Lehrer, -", english: "the teacher (m.), -s", source: "Folge 11", type: "vocab" },
+                { german: "die Lehrerin, -nen", english: "the teacher (f.), -s", source: "Folge 11", type: "vocab" },
+                { german: "der Verkäufer, -", english: "the salesperson (m.), -s", source: "Folge 11", type: "vocab" },
+                { german: "die Verkäuferin, -nen", english: "the salesperson (f.), -s", source: "Folge 11", type: "vocab" },
+                { german: "anrufen", english: "to call (on the phone)", source: "Folge 12", type: "vocab" },
+                { german: "einkaufen", english: "to go shopping (groceries)", source: "Folge 12", type: "vocab" },
+                { german: "aufstehen", english: "to get up", source: "Folge 12", type: "vocab" },
+                { german: "der Wecker, -", english: "the alarm clock, -s", source: "Folge 12", type: "vocab" },
+                { german: "frühstücken", english: "to eat breakfast", source: "Folge 12", type: "vocab" },
+                { german: "Ich stehe um 7 Uhr auf.", english: "I get up at 7 o'clock.", source: "Folge 12", "type": "phrase" },
+                { german: "Ich rufe dich an.", english: "I'll call you.", source: "Folge 12", type: "phrase" },
+                { german: "der Tag, -e", english: "the day, -s", source: "Folge 12", type: "vocab" },
+                { german: "der Morgen, -", english: "the morning, -s", source: "Folge 12", type: "vocab" },
+                { german: "der Abend, -e", english: "the evening, -s", source: "Folge 12", type: "vocab" },
+                { german: "die Nacht, -e", english: "the night, -s", source: "Folge 12", type: "vocab" },
+                { german: "ins Bett gehen", english: "to go to bed", source: "Folge 12", type: "phrase" },
+                { german: "Ich gehe um 22 Uhr ins Bett.", english: "I go to bed at 10 p.m.", source: "Folge 12", type: "phrase" },
+                
+                // Folge 13-14: Time & Hobbies
+                { german: "der Tag, -e", english: "the day, -s", source: "Folge 13", type: "vocab" },
+                { german: "der Morgen, -", english: "the morning, -s", source: "Folge 13", type: "vocab" },
+                { german: "der Abend, -e", english: "the evening, -s", source: "Folge 13", type: "vocab" },
+                { german: "heute", english: "today", source: "Folge 13", type: "vocab" },
+                { german: "morgen", english: "tomorrow", source: "Folge 13", type: "vocab" },
+                { german: "gestern", english: "yesterday", source: "Folge 13", type: "vocab" },
+                { german: "das Hobby, -s", english: "the hobby, -ies", source: "Folge 14", type: "vocab" },
+                { german: "lesen", english: "to read", source: "Folge 14", type: "vocab" },
+                { german: "fernsehen", english: "to watch TV", source: "Folge 14", type: "vocab" },
+                { german: "das Buch, -er", english: "the book, -s", source: "Folge 14", type: "vocab" },
+                { german: "die Musik", english: "the music", source: "Folge 14", type: "vocab" },
+                { german: "schwimmen", english: "to swim", source: "Folge 14", type: "vocab" },
+                { german: "kochen", english: "to cook", source: "Folge 14", type: "vocab" },
+                { german: "der Freund, -e", english: "the friend (m.), -s", source: "Folge 14", type: "vocab" },
+                { german: "die Freundin, -nen", english: "the friend (f.), -s", source: "Folge 14", type: "vocab" },
+                { german: "Was machst du gern?", english: "What do you like to do?", source: "Folge 14", type: "phrase" },
+                { german: "Ich spiele gern Fußball.", english: "I like to play soccer.", source: "Folge 14", "type": "phrase" },
+                { german: "Ich höre gern Musik.", english: "I like to listen to music.", source: "Folge 14", type: "phrase" },
+                { german: "Hast du Zeit?", english: "Do you have time?", source: "Folge 14", type: "phrase" },
+                { german: "Wann treffen wir uns?", english: "When are we meeting?", source: "Folge 14", type: "phrase" },
+                { german: "der Montag", english: "Monday", source: "Folge 13", type: "vocab" },
+                { german: "der Dienstag", english: "Tuesday", source: "Folge 13", type: "vocab" },
+                { german: "der Mittwoch", english: "Wednesday", source: "Folge 13", type: "vocab" },
+                { german: "der Donnerstag", english: "Thursday", source: "Folge 13", type: "vocab" },
+                { german: "der Freitag", english: "Friday", source: "Folge 13", type: "vocab" },
+                { german: "der Samstag", english: "Saturday", source: "Folge 13", type: "vocab" },
+                { german: "der Sonntag", english: "Sunday", source: "Folge 13", type: "vocab" },
+                { german: "die Woche, -n", english: "the week, -s", source: "Folge 13", type: "vocab" },
+                { german: "das Wochenende, -n", english: "the weekend, -s", source: "Folge 13", type: "vocab" },
+                { german: "Am Montag...", english: "On Monday...", source: "Folge 13", type: "phrase" },
+                { german: "Am Wochenende...", english: "On the weekend...", source: "Folge 13", type: "phrase" },
+                { german: "Freunde treffen", english: "to meet friends", source: "Folge 14", type: "phrase" },
+
+                // Folge 15-16: Weather & Modal Verbs
+                { german: "Die Sonne scheint.", english: "The sun is shining.", source: "Folge 15", "type": "phrase" },
+                { german: "kalt", english: "cold", source: "Folge 15", type: "vocab" },
+                { german: "warm", english: "warm", source: "Folge 15", type: "vocab" },
+                { german: "Wie ist das Wetter?", english: "How is the weather?", source: "Folge 15", type: "phrase" },
+                { german: "können", english: "to be able to, can", source: "Folge 16", type: "vocab" },
+                { german: "müssen", english: "to have to, must", source: "Folge 16", type: "vocab" },
+                { german: "wollen", english: "to want to", source: "Folge 16", type: "vocab" },
+                { german: "möchten", english: "would like to", source: "Folge 16", type: "vocab" },
+                { german: "Ich kann Deutsch sprechen.", english: "I can speak German.", source: "Folge 16", "type": "phrase" },
+                { german: "Ich muss arbeiten.", english: "I have to work.", source: "Folge 16", "type": "phrase" },
+                { german: "Ich will schlafen.", english: "I want to sleep.", source: "Folge 16", "type": "phrase" },
+                { german: "Ich möchte einen Kaffee.", english: "I would like a coffee.", source: "Folge 16", type: "phrase" },
+                { german: "dürfen", english: "to be allowed to, may", source: "Folge 16", type: "vocab" },
+                { german: "Darf ich...?", english: "May I...?", source: "Folge 16", type: "phrase" },
+                { german: "Hier darf man nicht rauchen.", english: "One is not allowed to smoke here.", source: "Folge 16", type: "phrase" },
+                
+                // Folge 17-18: Clothing & Transport
+                { german: "die Kleidung", english: "the clothing", source: "Folge 17", type: "vocab" },
+                { german: "die Hose, -n", english: "the pants, -", source: "Folge 17", type: "vocab" },
+                { german: "das T-Shirt, -s", english: "the T-shirt, -s", source: "Folge 17", type: "vocab" },
+                { german: "der Schuh, -e", english: "the shoe, -s", source: "Folge 17", type: "vocab" },
+                { german: "die Jacke, -n", english: "the jacket, -s", source: "Folge 17", type: "vocab" },
+                { german: "der Pullover, -", english: "the sweater, -s", source: "Folge 17", type: "vocab" },
+                { german: "tragen", english: "to wear / to carry", source: "Folge 17", type: "vocab" },
+                { german: "Ich trage eine Hose.", english: "I am wearing pants.", source: "Folge 17", "type": "phrase" },
+                { german: "Was trägst du heute?", english: "What are you wearing today?", source: "Folge 17", type: "phrase" },
+                { german: "der Bahnhof, -e", english: "the train station, -s", source: "Folge 18", type: "vocab" },
+                { german: "der Zug, -e", english: "the train, -s", source: "Folge 18", type: "vocab" },
+                { german: "fahren", english: "to drive, to go (by vehicle)", source: "Folge 18", type: "vocab" },
+                { german: "die Fahrkarte, -n", english: "the ticket, -s", source: "Folge 18", type: "vocab" },
+                { german: "das Auto, -s", english: "the car, -s", source: "Folge 18", type: "vocab" },
+                { german: "das Fahrrad, -er", english: "the bicycle, -s", source: "Folge 18", type: "vocab" },
+                { german: "die U-Bahn, -en", english: "the subway, -s", source: "Folge 18", type: "vocab" },
+                { german: "Ich fahre mit dem Bus.", english: "I'm going by bus.", source: "Folge 18", "type": "phrase" },
+                { german: "Wo ist der Bahnhof?", english: "Where is the train station?", source: "Folge 18", type: "phrase" },
+                { german: "brauchen", english: "to need", source: "Folge 18", type: "vocab" },
+                { german: "Ich brauche eine Fahrkarte.", english: "I need a ticket.", source: "Folge 18", type: "phrase" },
+                { german: "Wo fährt der Bus ab?", english: "Where does the bus depart from?", source: "Folge 18", type: "phrase" },
+                { german: "abfahren", english: "to depart", source: "Folge 18", type: "vocab" },
+                { german: "ankommen", english: "to arrive", source: "Folge 18", type: "vocab" },
+                { german: "umsteigen", english: "to transfer (vehicles)", source: "Folge 18", type: "vocab" },
+                { german: "Der Zug kommt an.", english: "The train is arriving.", source: "Folge 18", type: "phrase" },
+                { german: "Ich muss umsteigen.", english: "I have to transfer.", source: "Folge 18", type: "phrase" },
+
+                // Folge 19-20: Directions & Places
+                { german: "die Stadt, -e", english: "the city, -ies", source: "Folge 19", type: "vocab" },
+                { german: "die Ampel, -n", english: "the traffic light, -s", source: "Folge 19", type: "vocab" },
+                { german: "geradeaus", english: "straight ahead", source: "Folge 19", type: "vocab" },
+                { german: "links", english: "left", source: "Folge 19", type: "vocab" },
+                { german: "rechts", english: "right", source: "Folge 19", type: "vocab" },
+                { german: "Entschuldigung, ...", english: "Excuse me, ...", source: "Folge 19", type: "phrase" },
+                { german: "Wie komme ich zu...?", english: "How do I get to...?", source: "Folge 19", type: "phrase" },
+                { german: "Gehen Sie geradeaus.", english: "Go straight ahead. (formal)", source: "Folge 19", type: "phrase" },
+                { german: "Gehen Sie nach links.", english: "Go left. (formal)", source: "Folge 19", type: "phrase" },
+                { german: "das Restaurant, -s", english: "the restaurant, -s", source: "Folge 20", type: "vocab" },
+                { german: "die Speisekarte, -n", english: "the menu, -s", source: "Folge 20", type: "vocab" },
+                { german: "bestellen", english: "to order", source: "Folge 20", type: "vocab" },
+                { german: "bezahlen", english: "to pay", source: "Folge 20", type: "vocab" },
+                { german: "zusammen oder getrennt?", english: "together or separate? (paying)", source: "Folge 20", type: "phrase" },
+                { german: "Ich hätte gern...", english: "I would like to have...", source: "Folge 20", type: "phrase" },
+                { german: "Die Rechnung, bitte.", english: "The check, please.", source: "Folge 20", type: "phrase" },
+                { german: "Das macht...", english: "That makes... (total cost)", source: "Folge 20", type: "phrase" },
+                { german: "Stimmt so.", english: "Keep the change. (lit. 'It's fine so.')", source: "Folge 20", type: "phrase" },
+                { german: "das Trinkgeld, -er", english: "the tip, -s", source: "Folge 20", "type": "vocab" },
+                { german: "Guten Appetit!", english: "Enjoy your meal!", source: "Folge 20", "type": "phrase" },
+                { german: "Danke, gleichfalls!", english: "Thanks, likewise!", source: "Folge 20", "type": "phrase" },
+                { german: "das Museum, Museen", english: "the museum, -s", source: "Folge 19", type: "vocab" },
+                { german: "die Bank, -en", english: "the bank, -s", source: "Folge 19", type: "vocab" },
+                { german: "das Krankenhaus, -er", english: "the hospital, -s", source: "Folge 19", "type": "vocab" },
+                { german: "die Apotheke, -n", english: "the pharmacy, -ies", source: "Folge 19", "type": "vocab" },
+
+                // Folge 21-22: Professions & Office
+                { german: "das Büro, -s", english: "the office, -s", source: "Folge 21", type: "vocab" },
+                { german: "der Kollege, -n", english: "the colleague (m.), -s", source: "Folge 21", type: "vocab" },
+                { german: "die Kollegin, -nen", english: "the colleague (f.), -s", source: "Folge 21", type: "vocab" },
+                { german: "der Chef, -s", english: "the boss (m.), -es", source: "Folge 21", type: "vocab" },
+                { german: "die Chefin, -nen", english: "the boss (f.), -es", source: "Folge 21", type: "vocab" },
+                { german: "der Computer, -", english: "the computer, -s", source: "Folge 22", type: "vocab" },
+                { german: "die E-Mail, -s", english: "the e-mail, -s", source: "Folge 22", type: "vocab" },
+                { german: "schreiben", english: "to write", source: "Folge 22", type: "vocab" },
+                { german: "das Telefon, -e", english: "the telephone, -s", source: "Folge 22", type: "vocab" },
+                { german: "telefonieren", english: "to talk on the phone", source: "Folge 22", type: "vocab" },
+                { german: "eine E-Mail schreiben", english: "to write an e-mail", source: "Folge 22", type: "phrase" },
+                { german: "Ich arbeite als...", english: "I work as a...", source: "Folge 21", type: "phrase" },
+                { german: "der Termin, -e", english: "the appointment, -s", source: "Folge 22", type: "vocab" },
+                { german: "einen Termin haben", english: "to have an appointment", source: "Folge 22", type: "phrase" },
+                { german: "einen Termin vereinbaren", english: "to make an appointment", source: "Folge 22", type: "phrase" },
+                { german: "Können wir einen Termin vereinbaren?", english: "Can we make an appointment?", source: "Folge 22", type: "phrase" },
+                { german: "Wann haben Sie Zeit?", english: "When do you have time? (formal)", source: "Folge 22", type: "phrase" },
+                { german: "Passt es Ihnen um 10 Uhr?", english: "Does 10 o'clock work for you?", source: "Folge 22", type: "phrase" },
+                { german: "Ja, das passt.", english: "Yes, that works.", source: "Folge 22", type: "phrase" },
+                { german: "Nein, das geht leider nicht.", english: "No, that doesn't work, unfortunately.", source: "Folge 22", type: "phrase" },
+
+                // Folge 23-24: Past Tense (Perfekt)
+                { german: "haben", english: "to have (auxiliary verb)", source: "Folge 23", type: "vocab" },
+                { german: "sein", english: "to be (auxiliary verb)", source: "Folge 23", type: "vocab" },
+                { german: "gemacht", english: "done, made (past participle)", source: "Folge 23", type: "vocab" },
+                { german: "gekauft", english: "bought (past participle)", source: "Folge 23", type: "vocab" },
+                { german: "gelernt", english: "learned (past participle)", source: "Folge 23", type: "vocab" },
+                { german: "gearbeitet", english: "worked (past participle)", source: "Folge 23", type: "vocab" },
+                { german: "Ich habe... gemacht.", english: "I did/made...", source: "Folge 23", type: "phrase" },
+                { german: "Was hast du gemacht?", english: "What did you do?", source: "Folge 23", type: "phrase" },
+                { german: "gefahren", english: "driven, gone (past participle)", source: "Folge 24", type: "vocab" },
+                { german: "gekommen", english: "come (past participle)", source: "Folge 24", type: "vocab" },
+                { german: "gegangen", english: "gone, walked (past participle)", source: "Folge 24", type: "vocab" },
+                { german: "Ich bin... gefahren.", english: "I drove/went...", source: "Folge 24", type: "phrase" },
+                { german: "Er ist... gekommen.", english: "He came...", source: "Folge 24", type: "phrase" },
+                { german: "Wir sind... gegangen.", english: "We went/walked...", source: "Folge 24", type: "phrase" },
+                { german: "gesehen", english: "seen (past participle)", source: "Folge 23", type: "vocab" },
+                { german: "gelesen", english: "read (past participle)", source: "Folge 23", type: "vocab" },
+                { german: "geschlafen", english: "slept (past participle)", source: "Folge 23", type: "vocab" },
+                { german: "gegessen", english: "eaten (past participle)", source: "Folge 23", type: "vocab" },
+                { german: "getrunken", english: "drunk (past participle)", source: "Folge 23", type: "vocab" },
+                { german: "Ich habe einen Film gesehen.", english: "I watched a movie.", source: "Folge 23", type: "phrase" },
+                { german: "Er hat ein Buch gelesen.", english: "He read a book.", source: "Folge 23", "type": "phrase" },
+                { german: "Wir haben Pizza gegessen.", english: "We ate pizza.", source: "Folge 23", "type": "phrase" },
+                { german: "geblieben", english: "stayed (past participle)", source: "Folge 24", "type": "vocab" },
+                { german: "gereist", english: "traveled (past participle)", source: "Folge 24", "type": "vocab" },
+                { german: "Ich bin zu Hause geblieben.", english: "I stayed at home.", source: "Folge 24", "type": "phrase" },
+                { german: "Sie ist nach Berlin gereist.", english: "She traveled to Berlin.", source: "Folge 24", "type": "phrase" },
+
+                // Folge 25-26: Party & Invitations
+                { german: "die Party, -s", english: "the party, -ies", source: "Folge 25", type: "vocab" },
+                { german: "feiern", english: "to celebrate", source: "Folge 25", type: "vocab" },
+                { german: "die Einladung, -en", english: "the invitation, -s", source: "Folge 25", type: "vocab" },
+                { german: "einladen", english: "to invite", source: "Folge 25", type: "vocab" },
+                { german: "Ich lade dich ein.", english: "I'm inviting you.", source: "Folge 25", type: "phrase" },
+                { german: "Kommst du zu meiner Party?", english: "Are you coming to my party?", source: "Folge 25", type: "phrase" },
+                { german: "Danke für die Einladung.", english: "Thanks for the invitation.", source: "Folge 25", type: "phrase" },
+                { german: "Gute Idee!", english: "Good idea!", source: "Folge 26", type: "phrase" },
+                { german: "Das ist nett.", english: "That is nice.", source: "Folge 26", type: "phrase" },
+                { german: "Leider keine Zeit.", english: "Unfortunately no time.", source: "Folge 26", type: "phrase" },
+                { german: "Vielleicht nächstes Mal.", english: "Maybe next time.", source: "Folge 26", type: "phrase" },
+                { german: "mitbringen", english: "to bring along", source: "Folge 26", type: "vocab" },
+                { german: "Was soll ich mitbringen?", english: "What should I bring?", source: "Folge 26", type: "phrase" },
+            ],
+            grammar: [
+                {
+                    id: 'w-fragen',
+                    title: 'W-Fragen (Question Words)',
+                    content: `<p>In German, most questions that ask for information (not just "yes" or "no") start with a "W-Frage". The verb comes in the <strong>second position</strong> in the sentence.</p>
+                              <ul>
+                                <li><strong>Wer?</strong> - Who? (person)</li>
+                                <li><strong>Was?</strong> - What? (thing or concept)</li>
+                                <li><strong>Wo?</strong> - Where? (location)</li>
+                                <li><strong>Woher?</strong> - Where from? (origin)</li>
+                                <li><strong>Wohin?</strong> - Where to? (destination)</li>
+                                <li><strong>Wie?</strong> - How? (e.g., Wie geht's?) / What? (e.g., Wie heißt du?)</li>
+                                <li><strong>Warum?</strong> - Why?</li>
+                              </ul>`,
+                    examples: [
+                        "<strong>Wer</strong> bist du? (Who are you?)",
+                        "<strong>Was</strong> ist das? (What is that?)",
+                        "<strong>Wo</strong> wohnst du? (Where do you live?)",
+                        "<strong>Woher</strong> kommst du? (Where do you come from?)",
+                        "<strong>Wohin</strong> fährst du? (Where are you driving to?)",
+                        "<strong>Wie</strong> heißt du? (What are you called? lit. 'How are you called?')"
+                    ]
+                },
+                {
+                    id: 'konjugation',
+                    title: 'Verb Conjugation (Present Tense)',
+                    content: `<p>Regular verbs in the present tense (Präsens) follow a clear pattern. You take the verb stem (e.g., from <strong>komm</strong>en, the stem is <strong>komm-</strong>) and add an ending based on the subject.</p>
+                              <p><strong>Regular Verb Pattern (e.g., kommen):</strong></p>
+                              <ul>
+                                <li><strong>ich</strong> (I) <strong>-e</strong> &rarr; ich komm<strong>e</strong></li>
+                                <li><strong>du</strong> (you, informal) <strong>-st</strong> &rarr; du komm<strong>st</strong></li>
+                                <li><strong>er/sie/es</strong> (he/she/it) <strong>-t</strong> &rarr; er komm<strong>t</strong></li>
+                                <li><strong>wir</strong> (we) <strong>-en</strong> &rarr; wir komm<strong>en</strong></li>
+                                <li><strong>ihr</strong> (you, plural informal) <strong>-t</strong> &rarr; ihr komm<strong>t</strong></li>
+                                <li><strong>sie/Sie</strong> (they/you, formal) <strong>-en</strong> &rarr; sie komm<strong>en</strong></li>
+                              </ul>
+                              <p>The verbs <strong>sein</strong> (to be) and <strong>haben</strong> (to have) are highly irregular and must be memorized.</p>
+                              <p><strong>sein (to be):</strong><br>
+                                 ich bin, du bist, er/sie/es ist, wir sind, ihr seid, sie/Sie sind</p>
+                              <p><strong>haben (to have):</strong><br>
+                                 ich habe, du hast, er/sie/es hat, wir haben, ihr habt, sie/Sie haben</p>`,
+                    examples: [
+                        "Ich <strong>wohne</strong> in Berlin.",
+                        "Du <strong>lernst</strong> Deutsch.",
+                        "Er <strong>heißt</strong> Nico.",
+                        "<strong>Bist</strong> du Nico? (Are you Nico?)",
+                        "Er <strong>hat</strong> einen Bruder. (He has a brother.)"
+                    ]
+                },
+                {
+                    id: 'artikel-nom',
+                    title: 'Articles (Nominative)',
+                    content: `<p>Every German noun has a grammatical gender: masculine, feminine, or neuter. The article (like "the" or "a") changes to show this gender. The Nominative case is used for the <strong>subject</strong> of a sentence (the person/thing doing the action).</p>
+                              <p><strong>Definite Articles ("the"):</strong></p>
+                              <ul>
+                                <li>Masculine: <strong>der</strong> Bus</li>
+                                <li>Feminine: <strong>die</strong> Tasche</li>
+                                <li>Neuter: <strong>das</strong> Auto</li>
+                                <li>Plural: <strong>die</strong> Eltern</li>
+                              </ul>
+                              <p><strong>Indefinite Articles ("a/an"):</strong></p>
+                              <ul>
+                                <li>Masculine: <strong>ein</strong> Bus</li>
+                                <li>Feminine: <strong>eine</strong> Tasche</li>
+                                <li>Neuter: <strong>ein</strong> Auto</li>
+                                <li>Plural: (no indefinite article)</li>
+                              </ul>
+                              <p><strong>Negative Article ("not a/an"):</strong></p>
+                              <ul>
+                                <li>Masculine: <strong>kein</strong> Bus</li>
+                                <li>Feminine: <strong>keine</strong> Tasche</li>
+                                <li>Neuter: <strong>kein</strong> Auto</li>
+                                <li>Plural: <strong>keine</strong> Eltern</li>
+                              </ul>`,
+                    examples: [
+                        "<strong>Der Bus</strong> ist gelb. (The bus is yellow.)",
+                        "<strong>Eine Frau</strong> spricht. (A woman is speaking.)",
+                        "<strong>Das</strong> ist <strong>kein</strong> Auto. (That is not a car.)"
+                    ]
+                },
+                {
+                    id: 'ja-nein-fragen',
+                    title: 'Yes/No Questions',
+                    content: `<p>To ask a question that can be answered with "yes" (Ja) or "no" (Nein), you simply change the word order. The <strong>conjugated verb</strong> moves to the <strong>first position</strong>.</p>
+                              <p><strong>Statement:</strong></p>
+                              <p>Du kommst aus Spanien. (You come from Spain.)</p>
+                              <p><strong>Question:</strong></p>
+                              <p><strong>Kommst</strong> du aus Spanien? (Do you come from Spain?)</p>`,
+                    examples: [
+                        "<strong>Statement:</strong> Das ist ein Auto. (That is a car.)",
+                        "<strong>Question:</strong> <strong>Ist</strong> das ein Auto? (Is that a car?)",
+                        "<strong>Statement:</strong> Sie heißen Lisa. (Your name is Lisa.)",
+                        "<strong>Question:</strong> <strong>Heißen</strong> Sie Lisa? (Is your name Lisa?)"
+                    ]
+                },
+                {
+                    id: 'akkusativ',
+                    title: 'The Accusative Case (Akkusativ)',
+                    content: `<p>The Accusative case is used for the <strong>direct object</strong> of a sentence. This is the noun that directly receives the action of the verb. Common verbs that take an Accusative object include: <strong>haben</strong> (to have), <strong>suchen</strong> (to look for), <strong>kaufen</strong> (to buy), <strong>sehen</strong> (to see), <strong>essen</strong> (to eat), <strong>trinken</strong> (to drink), <strong>lesen</strong> (to read), <strong>brauchen</strong> (to need), and <strong>möchten</strong> (to would like).</p>
+                              <p>Only the <strong>masculine</strong> articles change in the Accusative case.</p>
+                              <p><strong>Definite Articles ("the"):</strong></p>
+                              <ul>
+                                <li>Masculine: <strong>den</strong> (was 'der')</li>
+                                <li>Feminine: <strong>die</strong> (no change)</li>
+                                <li>Neuter: <strong>das</strong> (no change)</li>
+                                <li>Plural: <strong>die</strong> (no change)</li>
+                              </ul>
+                              <p><strong>Indefinite Articles ("a/an"):</strong></p>
+                              <ul>
+                                <li>Masculine: <strong>einen</strong> (was 'ein')</li>
+                                <li>Feminine: <strong>eine</strong> (no change)</li>
+                                <li>Neuter: <strong>ein</strong> (no change)</li>
+                              </ul>
+                              <p>Certain prepositions also *always* take the Accusative case, such as <strong>für</strong> (for), <strong>durch</strong> (through), and <strong>ohne</strong> (without).</p>`,
+                    examples: [
+                        "Ich habe <strong>einen Hund</strong> (m.). (I have a dog.)",
+                        "Nico kauft <strong>eine Tasche</strong> (f.). (Nico buys a bag.)",
+                        "Er liest <strong>das Buch</strong> (n.). (He is reading the book.)",
+                        "Das Geschenk ist <strong>für meinen Bruder</strong> (m.). (The gift is for my brother.)"
+                    ]
+                },
+                {
+                    id: 'possessiv',
+                    title: 'Possessive Determiners',
+                    content: `<p>Possessive determiners (like "my", "your", "his") show ownership. In German, they must have an ending that matches the <strong>gender</strong> and <strong>case</strong> of the noun they describe.</p>
+                              <p>Here are the basic forms in the <strong>Nominative</strong> case:</p>
+                              <ul>
+                                <li>ich (I) &rarr; <strong>mein</strong> (m/n), <strong>meine</strong> (f/pl)</li>
+                                <li>du (you) &rarr; <strong>dein</strong> (m/n), <strong>deine</strong> (f/pl)</li>
+                                <li>er/es (he/it) &rarr; <strong>sein</strong> (m/n), <strong>seine</strong> (f/pl)</li>
+                                <li>sie (she) &rarr; <strong>ihr</strong> (m/n), <strong>ihre</strong> (f/pl)</li>
+                                <li>wir (we) &rarr; <strong>unser</strong> (m/n), <strong>unsere</strong> (f/pl)</li>
+                                <li>ihr (you pl.) &rarr; <strong>euer</strong> (m/n), <strong>eure</strong> (f/pl)</li>
+                                <li>sie/Sie (they/you, formal) &rarr; <strong>ihr</strong>/<strong>Ihr</strong> (m/n), <strong>ihre</strong>/<strong>Ihre</strong> (f/pl)</li>
+                              </ul>
+                              <p>In the <strong>Accusative</strong> case, they add <strong>-en</strong> for masculine nouns (e.g., "Ich sehe <strong>meinen</strong> Bruder.").</p>`,
+                    examples: [
+                        "Das ist <strong>meine Schwester</strong> (f.). (That is my sister.)",
+                        "<strong>Sein Bruder</strong> (m.) heißt Leo. (His brother is called Leo.)",
+                        "Wo ist S<strong>Ihr Pass</strong> (m.), Herr González? (Where is your passport, Mr. González?)",
+                        "Nico sucht <strong>seine Tasche</strong> (f.). (Nico is looking for his bag.)"
+                    ]
+                },
+                {
+                    id: 'modalverben',
+                    title: 'Modal Verbs (Modalverben)',
+                    content: `<p>Modal verbs change the meaning of a second verb in the sentence. The modal verb is <strong>conjugated</strong> and goes in <strong>position 2</strong>. The second verb (the main action) is <strong>infinitive</strong> and goes to the <strong>end of the sentence</strong>.</p>
+                              <p><strong>Common A1 Modal Verbs:</strong></p>
+                              <ul>
+                                <li><strong>können</strong> (can, to be able to): ich kann, du kannst, er/sie/es kann</li>
+                                <li><strong>müssen</strong> (must, to have to): ich muss, du musst, er/sie/es muss</li>
+                                <li><strong>wollen</strong> (want to): ich will, du willst, er/sie/es will</li>
+                                <li><strong>möchten</strong> (would like to - *polite*): ich möchte, du möchtest, er/sie/es möchte</li>
+                                <li><strong>dürfen</strong> (may, to be allowed to): ich darf, du darfst, er/sie/es darf</li>
+                              </ul>
+                              <p>Note: The 'ich' and 'er/sie/es' forms are the same for most modal verbs (except 'möchten' which is regular)!</p>`,
+                    examples: [
+                        "Ich <strong>kann</strong> Deutsch <strong>sprechen</strong>. (I can speak German.)",
+                        "Du <strong>musst</strong> ein Ticket <strong>kaufen</strong>. (You must buy a ticket.)",
+                        "Nico <strong>will</strong> seine Tante <strong>finden</strong>. (Nico wants to find his aunt.)",
+                        "Ich <strong>möchte</strong> einen Kaffee <strong>bestellen</strong>. (I would like to order a coffee.)",
+                        "Hier <strong>darf</strong> man nicht <strong>rauchen</strong>. (One is not allowed to smoke here.)"
+                    ]
+                },
+                {
+                    id: 'trennbar',
+                    title: 'Separable Verbs (Trennbare Verben)',
+                    content: `<p>Many German verbs have a prefix that separates from the main verb in the present tense. Examples include <strong>an</strong>rufen (to call), <strong>ein</strong>kaufen (to shop), <strong>auf</strong>stehen (to get up), <strong>fern</strong>sehen (to watch TV), <strong>mit</strong>bringen (to bring with).</p>
+                              <p>In a main sentence, the <strong>verb stem</strong> is <strong>conjugated</strong> and goes in <strong>position 2</strong>. The <strong>prefix</strong> goes to the <strong>end of the sentence</strong>.</p>
+                              <p>If the separable verb is used with a modal verb, the *entire* separable verb (prefix + stem) goes to the end in its infinitive form.</p>`,
+                    examples: [
+                        "Ich <strong>rufe</strong> dich <strong>an</strong>. (I am calling you.)",
+                        "Nico <strong>steht</strong> um 8 Uhr <strong>auf</strong>. (Nico gets up at 8 o'clock.)",
+                        "Wir <strong>sehen</strong> abends <strong>fern</strong>. (We watch TV in the evening.)",
+                        "Was <strong>bringst</strong> du <strong>mit</strong>? (What are you bringing with?)",
+                        "Ich will dich später <strong>anrufen</strong>. (I want to call you later.)"
+                    ]
+                },
+                {
+                    id: 'perfekt',
+                    title: 'The Past Tense (Perfekt)',
+                    content: `<p>The Perfekt is the most common way to talk about the past in spoken German. It is formed with a helping verb (<strong>haben</strong> or <strong>sein</strong>) and a <strong>past participle (Partizip II)</strong>.</p>
+                              <p><strong>Sentence Structure:</strong><br>Subject + [haben/sein in position 2] + ... + [Past Participle at end].</p>
+                              <p><strong>1. Helping Verb 'haben':</strong><br>Used for most verbs (transitive verbs, actions that don't involve movement or change of state).</p>
+                              <p><strong>2. Helping Verb 'sein':</strong><br>Used for verbs that show movement from A to B (e.g., <strong>gehen, fahren, fliegen, kommen</strong>) or a change of state (e.g., <strong>aufstehen, einschlafen, bleiben</strong>).</p>
+                              <p><strong>Past Participles (Partizip II):</strong><br>
+                              - Regular verbs: <strong>ge</strong> + (stem) + <strong>t</strong> (e.g., gemacht, gekauft, gelernt)<br>
+                              - Irregular verbs: Often end in <strong>-en</strong> and have a stem change (e.g., <strong>ge</strong>gess<strong>en</strong>, <strong>ge</strong>tr<strong>u</strong>nk<strong>en</strong>, <strong>ge</strong>blieb<strong>en</strong>). These must be memorized.</p>`,
+                    examples: [
+                        "Ich <strong>habe</strong> Pizza <strong>gegessen</strong>. (I ate pizza.)",
+                        "Er <strong>hat</strong> ein Buch <strong>gelesen</strong>. (He read a book.)",
+                        "Wir <strong>haben</strong> Fußball <strong>gespielt</strong>. (We played soccer.)",
+                        "Sie <strong>ist</strong> nach Berlin <strong>gefahren</strong>. (She drove/went to Berlin.)",
+                        "Nico <strong>ist</strong> in die Schweiz <strong>gekommen</strong>. (Nico came to Switzerland.)",
+                        "Ich <strong>bin</strong> zu Hause <strong>geblieben</strong>. (I stayed at home.)"
+                    ]
+                }
+            ]
+        };
+
+        // =================================================================
+        // GLOBAL STATE
+        // =================================================================
+        const state = {
+            currentView: 'flashcards',
+            allCards: [...nicoWegData.vocabulary], // Store a master copy
+            currentDeck: [],
+            currentCardIndex: 0,
+            isCardFlipped: false,
+            chatHistory: [], // Store dialogue history
+        };
+        
+        // =================================================================
+        // FUNCTIONS
+        // =================================================================
+
+        /**
+         * Initialize the application
+         */
+        function initialize() {
+            // Set up event listeners
+            tabFlashcards.addEventListener('click', () => switchView('flashcards'));
+            tabGrammar.addEventListener('click', () => switchView('grammar'));
+            tabDialogue.addEventListener('click', () => switchView('dialogue'));
+            deckSelector.addEventListener('change', filterAndShuffleDeck);
+            
+            cardScene.addEventListener('click', flipCard); 
+            nextBtn.addEventListener('click', nextCard);
+            prevBtn.addEventListener('click', prevCard);
+            shuffleBtn.addEventListener('click', filterAndShuffleDeck);
+
+            // Chat listener
+            chatForm.addEventListener('submit', handleChatSubmit);
+
+            // Initial setup
+            populateGrammarList();
+            filterAndShuffleDeck(); // Build the first deck
+            switchView('flashcards'); // Show flashcards by default
+        }
+
+        /**
+         * Switch between 'flashcards', 'grammar', and 'dialogue' views
+         */
+        function switchView(view) {
+            state.currentView = view;
+            
+            // Hide all views
+            flashcardView.classList.add('hidden');
+            grammarView.classList.add('hidden');
+            dialogueView.classList.add('hidden');
+            
+            // Remove all active tabs
+            tabFlashcards.classList.remove('tab-active');
+            tabGrammar.classList.remove('tab-active');
+            tabDialogue.classList.remove('tab-active');
+
+            if (view === 'flashcards') {
+                flashcardView.classList.remove('hidden');
+                tabFlashcards.classList.add('tab-active');
+            } else if (view === 'grammar') {
+                grammarView.classList.remove('hidden');
+                tabGrammar.classList.add('tab-active');
+            } else if (view === 'dialogue') {
+                dialogueView.classList.remove('hidden');
+                tabDialogue.classList.add('tab-active');
+                if (state.chatHistory.length === 0) {
+                    initializeDialogue(); // Start the chat if it's the first time
+                }
+            }
+        }
+
+        /**
+         * Filter the deck based on the selector, then shuffle it
+         */
+        function filterAndShuffleDeck() {
+            const filter = deckSelector.value;
+            
+            if (filter === 'all') {
+                state.currentDeck = [...state.allCards];
+            } else {
+                state.currentDeck = state.allCards.filter(card => card.type === filter);
+            }
+            
+            // Shuffle the new deck
+            for (let i = state.currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [state.currentDeck[i], state.currentDeck[j]] = [state.currentDeck[j], state.currentDeck[i]];
+            }
+            
+            state.currentCardIndex = 0;
+            state.isCardFlipped = false;
+            renderFlashcard();
+        }
+
+        /**
+         * Update the flashcard UI with the current card data
+         */
+        function renderFlashcard() {
+            // Reset card flip
+            card.classList.remove('is-flipped');
+            state.isCardFlipped = false;
+
+            if (state.currentDeck.length === 0) {
+                // Show "no cards" message
+                cardScene.classList.add('hidden');
+                noCardsMsg.classList.remove('hidden');
+                progressText.textContent = "0 / 0";
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+                cardScene.classList.remove('cursor-pointer'); 
+                return;
+            }
+
+            // Show card scene
+            cardScene.classList.remove('hidden');
+            noCardsMsg.classList.add('hidden');
+            prevBtn.disabled = false;
+            nextBtn.disabled = false;
+            cardScene.classList.add('cursor-pointer');
+
+            const currentCard = state.currentDeck[state.currentCardIndex];
+            
+            cardGerman.textContent = currentCard.german;
+            cardEnglish.textContent = currentCard.english;
+            
+            const typeText = currentCard.type.charAt(0).toUpperCase() + currentCard.type.slice(1);
+            cardTypeFront.textContent = typeText;
+            cardTypeBack.textContent = typeText;
+            
+            const sourceText = `Source: ${currentCard.source}`;
+            cardSourceFront.textContent = sourceText;
+            cardSourceBack.textContent = sourceText;
+            
+            progressText.textContent = `${state.currentCardIndex + 1} / ${state.currentDeck.length}`;
+        }
+
+        /**
+         * Flip the current card
+         */
+        function flipCard() {
+            if (state.currentDeck.length === 0) return;
+            state.isCardFlipped = !state.isCardFlipped;
+            card.classList.toggle('is-flipped');
+        }
+
+        /**
+         * Show the next card in the deck
+         */
+        function nextCard() {
+            if (state.currentDeck.length === 0) return;
+            state.currentCardIndex = (state.currentCardIndex + 1) % state.currentDeck.length;
+            renderFlashcard();
+        }
+
+        /**
+         * Show the previous card in the deck
+         */
+        function prevCard() {
+            if (state.currentDeck.length === 0) return;
+            state.currentCardIndex = (state.currentCardIndex - 1 + state.currentDeck.length) % state.currentDeck.length;
+            renderFlashcard();
+        }
+
+        /**
+         * Create the list of grammar topics
+         */
+        function populateGrammarList() {
+            grammarList.innerHTML = ''; // Clear existing list
+            nicoWegData.grammar.forEach(topic => {
+                const button = document.createElement('button');
+                // Updated styles for grammar list items
+                button.className = "w-full text-left py-3 px-4 rounded-lg font-medium text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 transition focus:outline-none focus:bg-indigo-100 focus:text-indigo-700 grammar-topic-btn";
+                button.textContent = topic.title;
+                button.dataset.topicId = topic.id;
+                
+                button.addEventListener('click', () => {
+                    renderGrammarContent(topic.id);
+                    // Update active state for buttons
+                    document.querySelectorAll('.grammar-topic-btn').forEach(btn => {
+                        btn.classList.remove('bg-indigo-100', 'text-indigo-700', 'font-bold');
+                    });
+                    button.classList.add('bg-indigo-100', 'text-indigo-700', 'font-bold');
+                });
+                
+                grammarList.appendChild(button);
+            });
+        }
+
+        /**
+         * Display the content for a selected grammar topic
+         */
+        function renderGrammarContent(topicId) {
+            const topic = nicoWegData.grammar.find(t => t.id === topicId);
+            if (!topic) return;
+
+            let examplesHtml = '';
+            if (topic.examples && topic.examples.length > 0) {
+                examplesHtml = '<h3>Examples:</h3><ul class="list-disc pl-5 space-y-1">';
+                topic.examples.forEach(example => {
+                    examplesHtml += `<li><code>${example}</code></li>`;
+                });
+                examplesHtml += '</ul>';
+            }
+            
+            grammarContent.innerHTML = `
+                <h2 class="text-3xl font-bold mb-4">${topic.title}</h2>
+                <div class="space-y-4">
+                    ${topic.content}
+                    ${examplesHtml}
+                </div>
+            `;
+            
+            // Show the original content
+            grammarPlaceholder.classList.add('hidden');
+            grammarContent.classList.remove('hidden');
+        }
+
+
+        // =================================================================
+        // GEMINI API FUNCTIONS
+        // =================================================================
+
+        /**
+         * Simple exponential backoff retry function
+         */
+        async function retry(fn, retries = 3, delay = 1000) {
+            let lastError;
+            for (let i = 0; i < retries; i++) {
+                try {
+                    return await fn();
+                } catch (error) {
+                    lastError = error;
+                    // Don't log retries as errors in the console
+                    if (i < retries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+                    }
+                }
+            }
+            throw lastError;
+        }
+
+        /**
+         * Calls our secure Netlify serverless function
+         */
+        async function callGeminiAPI(payload) {
+            // This function now calls our own serverless function, not Google directly
+            // The serverless function will be at the path /.netlify/functions/gemini
+            const response = await fetch('/.netlify/functions/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload) // Send the same payload
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                console.error("Serverless Function Error:", errorBody);
+                throw new Error(`Serverless function failed with status ${response.status}`);
+            }
+            
+            return response.json(); // It will return the same JSON structure from Google
+        }
+
+
+        // =================================================================
+        // DIALOGUE (CHAT) FUNCTIONS
+        // =================================================================
+
+        /**
+         * Sets up the initial state for the dialogue
+         */
+        function initializeDialogue() {
+            chatWindow.innerHTML = ''; // Clear chat window
+            
+            const initialMessage = "Hallo! Wie geht's?";
+            const firstTutorMessage = {
+                role: "model",
+                parts: [{ text: initialMessage }]
+            };
+            // Set history with only the tutor's first message
+            state.chatHistory = [firstTutorMessage];
+            
+            // Add the initial message to the UI
+            const messageHtml = `
+                <div class="flex justify-start">
+                    <div class="p-3 rounded-xl bg-indigo-100 text-indigo-900 max-w-xs md:max-w-md shadow-sm">
+                        <p class="font-bold text-sm">Tutor</p>
+                        <p class="text-base">${initialMessage}</p>
+                    </div>
+                </div>
+            `;
+            chatWindow.innerHTML = messageHtml;
+            userInput.value = '';
+        }
+
+        /**
+         * Handles the chat form submission
+         */
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const userText = userInput.value.trim();
+            if (userText === '') return;
+
+            addMessageToChat('user', userText); // Adds to UI and state.chatHistory
+            userInput.value = '';
+            dialogueLoading.classList.remove('hidden');
+            sendBtn.disabled = true;
+            userInput.disabled = true;
+
+            try {
+                await getDialogueResponse();
+            } catch (error) {
+                console.error("Error getting dialogue response:", error);
+                // Add error message to UI, but not to state history to avoid resending
+                addMessageToChat('tutor', "Entschuldigung, ich habe ein Problem. Bitte versuche es noch einmal.", false); 
+            } finally {
+                dialogueLoading.classList.add('hidden');
+                sendBtn.disabled = false;
+                userInput.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        /**
+         * Adds a message to the chat UI and (optionally) to state
+         */
+        function addMessageToChat(role, text, addToHistory = true) {
+            // Sanitize text to prevent HTML injection
+            const sanitizedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            // Add to state
+            if (addToHistory) {
+                // Note: API uses 'model' for tutor, 'user' for user
+                const apiRole = (role === 'tutor') ? 'model' : 'user';
+                state.chatHistory.push({
+                    role: apiRole,
+                    parts: [{ text: sanitizedText }] // Add sanitized text to history
+                });
+            }
+
+            // Add to UI
+            let messageHtml = '';
+            if (role === 'user') {
+                messageHtml = `
+                    <div class="flex justify-end">
+                        <div class="p-3 rounded-xl bg-white border border-gray-200 text-gray-800 max-w-xs md:max-w-md shadow-sm">
+                            <p class="font-bold text-sm text-indigo-600">Du</p>
+                            <p class="text-base">${sanitizedText}</p>
+                        </div>
+                    </div>
+                `;
+            } else { // 'tutor'
+                messageHtml = `
+                    <div class="flex justify-start">
+                        <div class="p-3 rounded-xl bg-indigo-100 text-indigo-900 max-w-xs md:max-w-md shadow-sm">
+                            <p class="font-bold text-sm">Tutor</p>
+                            <p class="text-base">${sanitizedText}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chatWindow.insertAdjacentHTML('beforeend', messageHtml);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll
+        }
+
+        /**
+         * Gets the next dialogue response from the Gemini API
+         */
+        async function getDialogueResponse() {
+            const systemPrompt = "You are a friendly German language tutor simulating a simple A1-level conversation. Keep your responses very short (1-2 sentences) and use only simple A1-level vocabulary. Only speak in German. Do not use English. Do not add greetings or sign-offs if the conversation is ongoing. Just respond to the user's last message to keep the conversation flowing.";
+
+            // Filter out any potential error messages that were not added to history
+            const cleanHistory = state.chatHistory.filter(msg => msg.parts[0].text.length > 0);
+
+            const payload = {
+                contents: cleanHistory, // Send the clean history
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    temperature: 0.9,
+                    maxOutputTokens: 50,
+                }
+            };
+
+            const apiFn = () => callGeminiAPI(payload);
+            const result = await retry(apiFn);
+            
+            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (text) {
+                addMessageToChat('tutor', text); // Adds to UI and state.chatHistory
+            } else {
+                // Add to UI, but not to history
+                addMessageToChat('tutor', "Ich verstehe nicht. Kannst du das wiederholen?", false);
+            }
+        }
+
+        // =================================================================
+        // START THE APP
+        // =================================================================
+        document.addEventListener('DOMContentLoaded', initialize);
+
+    </script>
+</body>
+</html>
