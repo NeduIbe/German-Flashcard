@@ -69,6 +69,32 @@
             background-color: #eef2ff; /* indigo-50 */
             color: #4f46e5; /* indigo-700 */
         }
+        
+        /* Speak button style */
+        .btn-speak {
+            position: absolute;
+            bottom: 1rem; /* bottom-4 */
+            left: 1rem;  /* left-4 */
+            color: #6366f1; /* indigo-500 */
+            padding: 0.5rem; /* p-2 */
+            border-radius: 9999px; /* rounded-full */
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-speak:hover {
+            color: #4f46e5; /* indigo-700 */
+            background-color: #eef2ff; /* indigo-50 */
+        }
+        .btn-speak-example {
+            color: #6366f1; /* indigo-500 */
+            padding: 0.25rem; /* p-1 */
+            border-radius: 9999px; /* rounded-full */
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-speak-example:hover {
+            color: #4f46e5; /* indigo-700 */
+            background-color: #eef2ff; /* indigo-50 */
+        }
+
 
         /* Custom Tab Navigation */
         #tab-nav-container {
@@ -117,7 +143,7 @@
     <div id="app" class="max-w-4xl mx-auto">
         <!-- Header -->
         <header class="mb-8 text-center">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">
+            <h1 class="text-4xl md:text-5xl font-extold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">
                 Nicos Weg A1
             </h1>
             <p class="text-lg md:text-xl text-gray-600 mt-1">Lernbegleiter von chinedu</p>
@@ -162,7 +188,15 @@
                         <!-- Card Front (German) -->
                         <div id="card-front" class="absolute w-full h-full backface-hidden bg-white rounded-2xl shadow-xl border-2 border-white p-6 flex flex-col justify-center items-center text-center">
                             <span class="absolute top-4 left-4 text-sm font-bold text-indigo-600 uppercase tracking-wider" id="card-type-front"></span>
-                            <p class="text-3xl md:text-4xl font-bold text-gray-800" id="card-german"></p>
+                            <p class="text-3xl md:text-4xl font-bold text-gray-800 px-10" id="card-german"></p>
+                            
+                            <!-- Speak Button -->
+                            <button id="speak-btn-front" class="btn-speak">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                </svg>
+                            </button>
+                            
                             <span class="absolute bottom-4 right-4 text-xs text-gray-500" id="card-source-front"></span>
                         </div>
                         
@@ -175,6 +209,20 @@
                             <!-- Main Content -->
                             <div class="flex-grow flex flex-col justify-center items-center w-full">
                                 <p class="text-3xl md:text-4xl font-bold text-gray-800" id="card-english"></p>
+                                
+                                <!-- NEW EXAMPLE SECTION -->
+                                <div id="card-example-container" class="mt-6 w-full px-4 hidden">
+                                    <p class="text-sm font-bold text-gray-600 border-b border-gray-300 pb-1 mb-2">Beispiel (Example):</p>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <p class="text-lg text-gray-700 italic" id="card-example"></p>
+                                        <button id="speak-btn-example" class="btn-speak-example">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- END NEW EXAMPLE SECTION -->
                             </div>
                     
                             <!-- Bottom Source -->
@@ -306,6 +354,12 @@
         const cardSourceBack = document.getElementById('card-source-back');
         const noCardsMsg = document.getElementById('no-cards-msg');
         
+        // --- New Elements ---
+        const speakBtnFront = document.getElementById('speak-btn-front');
+        const cardExampleContainer = document.getElementById('card-example-container');
+        const cardExample = document.getElementById('card-example');
+        const speakBtnExample = document.getElementById('speak-btn-example');
+        
         // Control elements
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
@@ -330,323 +384,323 @@
         // (Full nicoWegData object is here...)
         const nicoWegData = {
             vocabulary: [
-                // Folge 1: Greetings & Intro (Added back, was missing)
-                { german: "Hallo", english: "Hello", source: "Folge 1", type: "vocab" },
-                { german: "Guten Tag", english: "Hello / Good day", source: "Folge 1", type: "phrase" },
-                { german: "Wie geht's?", english: "How are you? (informal)", source: "Folge 1", type: "phrase" },
-                { german: "Es geht.", english: "It's okay. / So-so.", source: "Folge 1", type: "phrase" },
-                { german: "Gut, danke.", english: "Good, thanks.", source: "Folge 1", type: "phrase" },
-                { german: "Auf Wiedersehen", english: "Goodbye", source: "Folge 1", type: "phrase" },
-                { german: "Tschüss", english: "Bye (informal)", source: "Folge 1", type: "vocab" },
-                { german: "heißen", english: "to be called", source: "Folge 1", type: "vocab" },
-                { german: "Wie heißt du?", english: "What is your name? (informal)", source: "Folge 1", type: "phrase" },
-                { german: "Ich heiße...", english: "My name is...", source: "Folge 1", type: "phrase" },
-                { german: "sein", english: "to be", source: "Folge 1", type: "vocab" },
-                { german: "Ich bin...", english: "I am...", source: "Folge 1", type: "phrase" },
-                { german: "der Name, -n", english: "the name, -s", source: "Folge 1", type: "vocab" },
-                { german: "kommen", english: "to come", source: "Folge 1", type: "vocab" },
-                { german: "aus", english: "from", source: "Folge 1", type: "vocab" },
-                { german: "Spanien", english: "Spain", source: "Folge 1", type: "vocab" },
-                { german: "Deutschland", english: "Germany", source: "Folge 1", type: "vocab" },
-                { german: "Ich komme aus...", english: "I come from...", source: "Folge 1", type: "phrase" },
-                { german: "Sehr erfreut.", english: "Pleased to meet you.", source: "Folge 1", type: "phrase" },
+                // Folge 1: Greetings & Intro (Added examples)
+                { german: "Hallo", english: "Hello", source: "Folge 1", type: "vocab", example: "Hallo, wie geht's?" },
+                { german: "Guten Tag", english: "Hello / Good day", source: "Folge 1", type: "phrase", example: null },
+                { german: "Wie geht's?", english: "How are you? (informal)", source: "Folge 1", type: "phrase", example: null },
+                { german: "Es geht.", english: "It's okay. / So-so.", source: "Folge 1", type: "phrase", example: null },
+                { german: "Gut, danke.", english: "Good, thanks.", source: "Folge 1", type: "phrase", example: null },
+                { german: "Auf Wiedersehen", english: "Goodbye", source: "Folge 1", type: "phrase", example: null },
+                { german: "Tschüss", english: "Bye (informal)", source: "Folge 1", type: "vocab", example: "Tschüss, bis morgen!" },
+                { german: "heißen", english: "to be called", source: "Folge 1", type: "vocab", example: "Wie heißt du?" },
+                { german: "Wie heißt du?", english: "What is your name? (informal)", source: "Folge 1", type: "phrase", example: null },
+                { german: "Ich heiße...", english: "My name is...", source: "Folge 1", type: "phrase", example: null },
+                { german: "sein", english: "to be", source: "Folge 1", type: "vocab", example: "Ich bin Nico." },
+                { german: "Ich bin...", english: "I am...", source: "Folge 1", type: "phrase", example: null },
+                { german: "der Name, -n", english: "the name, -s", source: "Folge 1", type: "vocab", example: "Mein Name ist Lisa." },
+                { german: "kommen", english: "to come", source: "Folge 1", type: "vocab", example: "Ich komme aus Spanien." },
+                { german: "aus", english: "from", source: "Folge 1", type: "vocab", example: "Er kommt aus Deutschland." },
+                { german: "Spanien", english: "Spain", source: "Folge 1", type: "vocab", example: "Spanien ist ein Land in Europa." },
+                { german: "Deutschland", english: "Germany", source: "Folge 1", type: "vocab", example: "Ich wohne in Deutschland." },
+                { german: "Ich komme aus...", english: "I come from...", source: "Folge 1", type: "phrase", example: null },
+                { german: "Sehr erfreut.", english: "Pleased to meet you.", source: "Folge 1", type: "phrase", example: null },
         
                 // Folge 2-3: At the Airport, Police
-                { german: "der Flughafen, -", english: "the airport, -s", source: "Folge 2", type: "vocab" },
-                { german: "der Bus, -se", english: "the bus, -es", source: "Folge 2", type: "vocab" },
-                { german: "die Tasche, -n", english: "the bag, -s", source: "Folge 2", type: "vocab" },
-                { german: "sprechen", english: "to speak", source: "Folge 2", type: "vocab" },
-                { german: "Woher kommst du?", english: "Where do you come from? (informal)", source: "Folge 2", type: "phrase" },
-                { german: "Ich spreche...", english: "I speak...", source: "Folge 2", type: "phrase" },
-                { german: "die Polizei", english: "the police (no plural)", source: "Folge 3", type: "vocab" },
-                { german: "der Pass, -e", english: "the passport, -s", source: "Folge 3", type: "vocab" },
-                { german: "suchen", english: "to look for, to search", source: "Folge 3", type: "vocab" },
-                { german: "finden", english: "to find", source: "Folge 3", type: "vocab" },
-                { german: "Das ist...", english: "That is... / This is...", source: "Folge 3", type: "phrase" },
-                { german: "Ich suche...", english: "I am looking for...", source: "Folge 3", type: "phrase" },
-                { german: "Ich habe...", english: "I have...", source: "Folge 3", type: "phrase" },
-                { german: "Haben Sie...?", english: "Do you have...? (formal)", source: "Folge 3", type: "phrase" },
-                { german: "verloren", english: "lost", source: "Folge 3", type: "vocab" },
-                { german: "Ich habe meine Tasche verloren.", english: "I have lost my bag.", source: "Folge 3", type: "phrase" },
+                { german: "der Flughafen, -", english: "the airport, -s", source: "Folge 2", type: "vocab", example: "Nico ist am Flughafen." },
+                { german: "der Bus, -se", english: "the bus, -es", source: "Folge 2", type: "vocab", example: "Der Bus fährt in die Stadt." },
+                { german: "die Tasche, -n", english: "the bag, -s", source: "Folge 2", type: "vocab", example: "Wo ist meine Tasche?" },
+                { german: "sprechen", english: "to speak", source: "Folge 2", type: "vocab", example: "Ich spreche Deutsch und Englisch." },
+                { german: "Woher kommst du?", english: "Where do you come from? (informal)", source: "Folge 2", type: "phrase", example: null },
+                { german: "Ich spreche...", english: "I speak...", source: "Folge 2", type: "phrase", example: null },
+                { german: "die Polizei", english: "the police (no plural)", source: "Folge 3", type: "vocab", example: "Nico spricht mit der Polizei." },
+                { german: "der Pass, -e", english: "the passport, -s", source: "Folge 3", type: "vocab", example: "Haben Sie einen Pass?" },
+                { german: "suchen", english: "to look for, to search", source: "Folge 3", type: "vocab", example: "Ich suche meine Tasche." },
+                { german: "finden", english: "to find", source: "Folge 3", type: "vocab", example: "Ich kann meinen Schlüssel nicht finden." },
+                { german: "Das ist...", english: "That is... / This is...", source: "Folge 3", type: "phrase", example: null },
+                { german: "Ich suche...", english: "I am looking for...", source: "Folge 3", type: "phrase", example: null },
+                { german: "Ich habe...", english: "I have...", source: "Folge 3", type: "phrase", example: null },
+                { german: "Haben Sie...?", english: "Do you have...? (formal)", source: "Folge 3", type: "phrase", example: null },
+                { german: "verloren", english: "lost", source: "Folge 3", type: "vocab", example: "Ich habe meinen Pass verloren." },
+                { german: "Ich habe meine Tasche verloren.", english: "I have lost my bag.", source: "Folge 3", type: "phrase", example: null },
                 
                 // Folge 4-5: Address & Family
-                { german: "die Adresse, -n", english: "the address, -es", source: "Folge 4", type: "vocab" },
-                { german: "die Straße, -n", english: "the street, -s", source: "Folge 4", type: "vocab" },
-                { german: "die Hausnummer, -n", english: "the house number, -s", source: "Folge 4", type: "vocab" },
-                { german: "wohnen", english: "to live, to reside", source: "Folge 4", type: "vocab" },
-                { german: "Wo wohnst du?", english: "Where do you live? (informal)", source: "Folge 4", type: "phrase" },
-                { german: "Was ist deine Adresse?", english: "What is your address?", source: "Folge 4", type: "phrase" },
-                { german: "die Familie, -n", english: "the family, -ies", source: "Folge 5", type: "vocab" },
-                { german: "der Bruder, -", english: "the brother, -s", source: "Folge 5", type: "vocab" },
-                { german: "die Schwester, -n", english: "the sister, -s", source: "Folge 5", type: "vocab" },
-                { german: "die Eltern", english: "the parents (plural only)", source: "Folge 5", type: "vocab" },
-                { german: "der Vater, -", english: "the father, -s", source: "Folge 5", type: "vocab" },
-                { german: "die Mutter, -", english: "the mother, -s", source: "Folge 5", type: "vocab" },
-                { german: "der Sohn, -e", english: "the son, -s", source: "Folge 5", type: "vocab" },
-                { german: "die Tochter, -", english: "the daughter, -s", source: "Folge 5", type: "vocab" },
-                { german: "die Geschwister", english: "the siblings (plural only)", source: "Folge 5", type: "vocab" },
-                { german: "Haben Sie Kinder?", english: "Do you have children? (formal)", source: "Folge 5", type: "phrase" },
-                { german: "Hast du Geschwister?", english: "Do you have siblings? (informal)", source: "Folge 5", type: "phrase" },
-                { german: "Das ist mein/meine...", english: "This is my...", source: "Folge 5", type: "phrase" },
-                { german: "verheiratet", english: "married", source: "Folge 5", type: "vocab" },
-                { german: "ledig", english: "single", source: "Folge 5", type: "vocab" },
-                { german: "Bist du verheiratet?", english: "Are you married?", source: "Folge 5", type: "phrase" },
+                { german: "die Adresse, -n", english: "the address, -es", source: "Folge 4", type: "vocab", example: "Was ist deine Adresse?" },
+                { german: "die Straße, -n", english: "the street, -s", source: "Folge 4", type: "vocab", example: "Er wohnt in der Goethestraße." },
+                { german: "die Hausnummer, -n", english: "the house number, -s", source: "Folge 4", type: "vocab", example: "Die Hausnummer ist 5." },
+                { german: "wohnen", english: "to live, to reside", source: "Folge 4", type: "vocab", example: "Wo wohnst du?" },
+                { german: "Wo wohnst du?", english: "Where do you live? (informal)", source: "Folge 4", type: "phrase", example: null },
+                { german: "Was ist deine Adresse?", english: "What is your address?", source: "Folge 4", type: "phrase", example: null },
+                { german: "die Familie, -n", english: "the family, -ies", source: "Folge 5", type: "vocab", example: "Das ist meine Familie." },
+                { german: "der Bruder, -", english: "the brother, -s", source: "Folge 5", type: "vocab", example: "Das ist mein Bruder." },
+                { german: "die Schwester, -n", english: "the sister, -s", source: "Folge 5", type: "vocab", example: "Ich habe eine Schwester." },
+                { german: "die Eltern", english: "the parents (plural only)", source: "Folge 5", type: "vocab", example: "Meine Eltern wohnen in Spanien." },
+                { german: "der Vater, -", english: "the father, -s", source: "Folge 5", type: "vocab", example: "Mein Vater heißt Antonio." },
+                { german: "die Mutter, -", english: "the mother, -s", source: "Folge 5", type: "vocab", example: "Meine Mutter ist Ärztin." },
+                { german: "der Sohn, -e", english: "the son, -s", source: "Folge 5", type: "vocab", example: "Das ist der Sohn von Lisa." },
+                { german: "die Tochter, -", english: "the daughter, -s", source: "Folge 5", type: "vocab", example: "Das ist meine Tochter." },
+                { german: "die Geschwister", english: "the siblings (plural only)", source: "Folge 5", type: "vocab", example: "Hast du Geschwister?" },
+                { german: "Haben Sie Kinder?", english: "Do you have children? (formal)", source: "Folge 5", type: "phrase", example: null },
+                { german: "Hast du Geschwister?", english: "Do you have siblings? (informal)", source: "Folge 5", type: "phrase", example: null },
+                { german: "Das ist mein/meine...", english: "This is my...", source: "Folge 5", type: "phrase", example: null },
+                { german: "verheiratet", english: "married", source: "Folge 5", type: "vocab", example: "Bist du verheiratet?" },
+                { german: "ledig", english: "single", source: "Folge 5", type: "vocab", example: "Ich bin ledig." },
+                { german: "Bist du verheiratet?", english: "Are you married?", source: "Folge 5", type: "phrase", example: null },
 
                 // Folge 6-7: Apartment & Money
-                { german: "die Wohnung, -en", english: "the apartment, -s", source: "Folge 6", type: "vocab" },
-                { german: "das Zimmer, -", english: "the room, -s", source: "Folge 6", type: "vocab" },
-                { german: "die Küche, -n", english: "the kitchen, -s", source: "Folge 6", type: "vocab" },
-                { german: "das Bad, -er", english: "the bathroom, -s", source: "Folge 6", type: "vocab" },
-                { german: "das Geld", english: "the money (no plural)", source: "Folge 7", type: "vocab" },
-                { german: "kosten", english: "to cost", source: "Folge 7", type: "vocab" },
-                { german: "der Euro, -s", english: "the Euro, -s", source: "Folge 7", type: "vocab" },
-                { german: "teuer", english: "expensive", source: "Folge 7", type: "vocab" },
-                { german: "billig", english: "cheap", source: "Folge 7", type: "vocab" },
-                { german: "Wie viel kostet...?", english: "How much does... cost?", source: "Folge 7", type: "phrase" },
-                { german: "Das kostet...", english: "That costs...", source: "Folge 7", type: "phrase" },
-                { german: "Ich brauche...", english: "I need...", source: "Folge 7", type: "phrase" },
-                { german: "der Schlüssel, -", english: "the key, -s", source: "Folge 6", type: "vocab" },
-                { german: "die Miete, -n", english: "the rent, -s", source: "Folge 7", type: "vocab" },
-                { german: "Wie hoch ist die Miete?", english: "How high is the rent?", source: "Folge 7", type: "phrase" },
+                { german: "die Wohnung, -en", english: "the apartment, -s", source: "Folge 6", type: "vocab", example: "Die Wohnung ist groß." },
+                { german: "das Zimmer, -", english: "the room, -s", source: "Folge 6", type: "vocab", example: "Die Wohnung hat drei Zimmer." },
+                { german: "die Küche, -n", english: "the kitchen, -s", source: "Folge 6", type: "vocab", example: "Die Küche ist neu." },
+                { german: "das Bad, -er", english: "the bathroom, -s", source: "Folge 6", type: "vocab", example: "Wo ist das Bad?" },
+                { german: "das Geld", english: "the money (no plural)", source: "Folge 7", type: "vocab", example: "Ich habe kein Geld." },
+                { german: "kosten", english: "to cost", source: "Folge 7", type: "vocab", example: "Wie viel kostet das?" },
+                { german: "der Euro, -s", english: "the Euro, -s", source: "Folge 7", type: "vocab", example: "Das kostet 10 Euro." },
+                { german: "teuer", english: "expensive", source: "Folge 7", type: "vocab", example: "Das Auto ist teuer." },
+                { german: "billig", english: "cheap", source: "Folge 7", type: "vocab", example: "Das T-Shirt ist billig." },
+                { german: "Wie viel kostet...?", english: "How much does... cost?", source: "Folge 7", type: "phrase", example: null },
+                { german: "Das kostet...", english: "That costs...", source: "Folge 7", type: "phrase", example: null },
+                { german: "Ich brauche...", english: "I need...", source: "Folge 7", type: "phrase", example: null },
+                { german: "der Schlüssel, -", english: "the key, -s", source: "Folge 6", type: "vocab", example: "Ich suche meinen Schlüssel." },
+                { german: "die Miete, -n", english: "the rent, -s", source: "Folge 7", type: "vocab", example: "Die Miete ist hoch." },
+                { german: "Wie hoch ist die Miete?", english: "How high is the rent?", source: "Folge 7", type: "phrase", example: null },
                 
                 // Folge 8: Food & Drink
-                { german: "essen", english: "to eat", source: "Folge 8", type: "vocab" },
-                { german: "trinken", english: "to drink", source: "Folge 8", type: "vocab" },
-                { german: "der Apfel, -", english: "the apple, -s", source: "Folge 8", type: "vocab" },
-                { german: "das Brot, -e", english: "the bread, -s", source: "Folge 8", type: "vocab" },
-                { german: "die Milch", english: "the milk (no plural)", source: "Folge 8", type: "vocab" },
-                { german: "das Wasser", english: "the water", source: "Folge 8", type: "vocab" },
-                { german: "der Kaffee", english: "the coffee", source: "Folge 8", type: "vocab" },
-                { german: "der Tee", english: "the tea", source: "Folge 8", type: "vocab" },
-                { german: "der Saft, -e", english: "the juice, -s", source: "Folge 8", type: "vocab" },
-                { german: "das Gemüse", english: "the vegetables", source: "Folge 8", type: "vocab" },
-                { german: "das Obst", english: "the fruit", source: "Folge 8", type: "vocab" },
-                { german: "Ich habe Hunger.", english: "I am hungry.", source: "Folge 8", type: "phrase" },
-                { german: "Ich habe Durst.", english: "I am thirsty.", source: "Folge 8", type: "phrase" },
-                { german: "Was isst du gern?", english: "What do you like to eat?", source: "Folge 8", type: "phrase" },
-                { german: "Ich esse gern...", english: "I like to eat...", source: "Folge 8", type: "phrase" },
-                { german: "mögen", english: "to like", source: "Folge 8", type: "vocab" },
-                { german: "Ich mag...", english: "I like...", source: "Folge 8", type: "phrase" },
-                { german: "schmecken", english: "to taste", source: "Folge 8", type: "vocab" },
-                { german: "Das schmeckt gut.", english: "That tastes good.", source: "Folge 8", type: "phrase" },
+                { german: "essen", english: "to eat", source: "Folge 8", type: "vocab", example: "Was isst du gern?" },
+                { german: "trinken", english: "to drink", source: "Folge 8", type: "vocab", example: "Ich trinke gern Kaffee." },
+                { german: "der Apfel, -", english: "the apple, -s", source: "Folge 8", type: "vocab", example: "Der Apfel ist rot." },
+                { german: "das Brot, -e", english: "the bread, -s", source: "Folge 8", type: "vocab", example: "Ich kaufe ein Brot." },
+                { german: "die Milch", english: "the milk (no plural)", source: "Folge 8", type: "vocab", example: "Ich trinke Milch zum Frühstück." },
+                { german: "das Wasser", english: "the water", source: "Folge 8", type: "vocab", example: "Ich hätte gern ein Wasser." },
+                { german: "der Kaffee", english: "the coffee", source: "Folge 8", type: "vocab", example: "Ich trinke einen Kaffee." },
+                { german: "der Tee", english: "the tea", source: "Folge 8", type: "vocab", example: "Möchtest du einen Tee?" },
+                { german: "der Saft, -e", english: "the juice, -s", source: "Folge 8", type: "vocab", example: "Ich mag Apfelsaft." },
+                { german: "das Gemüse", english: "the vegetables", source: "Folge 8", type: "vocab", example: "Gemüse ist gesund." },
+                { german: "das Obst", english: "the fruit", source: "Folge 8", type: "vocab", example: "Ich esse gern Obst." },
+                { german: "Ich habe Hunger.", english: "I am hungry.", source: "Folge 8", type: "phrase", example: null },
+                { german: "Ich habe Durst.", english: "I am thirsty.", source: "Folge 8", type: "phrase", example: null },
+                { german: "Was isst du gern?", english: "What do you like to eat?", source: "Folge 8", type: "phrase", example: null },
+                { german: "Ich esse gern...", english: "I like to eat...", source: "Folge 8", type: "phrase", example: null },
+                { german: "mögen", english: "to like", source: "Folge 8", type: "vocab", example: "Ich mag Pizza." },
+                { german: "Ich mag...", english: "I like...", source: "Folge 8", type: "phrase", example: null },
+                { german: "schmecken", english: "to taste", source: "Folge 8", type: "vocab", example: "Die Suppe schmeckt gut." },
+                { german: "Das schmeckt gut.", english: "That tastes good.", source: "Folge 8", type: "phrase", example: null },
 
                 // Folge 9-10: Time & Health
-                { german: "der Termin, -e", english: "the appointment, -s", source: "Folge 9", type: "vocab" },
-                { german: "die Uhr, -en", english: "the clock, -s / o'clock", source: "Folge 9", type: "vocab" },
-                { german: "Wie spät ist es?", english: "What time is it?", source: "Folge 9", type: "phrase" },
-                { german: "Es ist... Uhr.", english: "It is... o'clock.", source: "Folge 9", type: "phrase" },
-                { german: "der Arzt, -e", english: "the doctor (m.), -s", source: "Folge 10", type: "vocab" },
-                { german: "die Ärztin, -nen", english: "the doctor (f.), -s", source: "Folge 10", type: "vocab" },
-                { german: "krank", english: "sick", source: "Folge 10", type: "vocab" },
-                { german: "der Körper, -", english: "the body, -ies", source: "Folge 10", type: "vocab" },
-                { german: "der Kopf, -e", english: "the head, -s", source: "Folge 10", type: "vocab" },
-                { german: "der Arm, -e", english: "the arm, -s", source: "Folge 10", type: "vocab" },
-                { german: "das Bein, -e", english: "the leg, -s", source: "Folge 10", type: "vocab" },
-                { german: "der Bauch, -e", english: "the stomach, -s", source: "Folge 10", type: "vocab" },
-                { german: "der Schmerz, -en", english: "the pain, -s", source: "Folge 10", type: "vocab" },
-                { german: "Ich habe Kopfschmerzen.", english: "I have a headache.", source: "Folge 10", "type": "phrase" },
-                { german: "Mir tut... weh.", english: "My... hurts.", source: "Folge 10", type: "phrase" },
-                { german: "Was fehlt Ihnen?", english: "What's wrong? (formal, to patient)", source: "Folge 10", type: "phrase" },
-                { german: "Gute Besserung!", english: "Get well soon!", source: "Folge 10", type: "phrase" },
-                { german: "der Hals, -e", english: "the throat, -s", source: "Folge 10", type: "vocab" },
-                { german: "der Rücken, -", english: "the back, -s", source: "Folge 10", "type": "vocab" },
-                { german: "Ich habe Halsschmerzen.", english: "I have a sore throat.", source: "Folge 10", "type": "phrase" },
+                { german: "der Termin, -e", english: "the appointment, -s", source: "Folge 9", type: "vocab", example: "Ich habe einen Termin um 10 Uhr." },
+                { german: "die Uhr, -en", english: "the clock, -s / o'clock", source: "Folge 9", type: "vocab", example: "Es ist 9 Uhr." },
+                { german: "Wie spät ist es?", english: "What time is it?", source: "Folge 9", type: "phrase", example: null },
+                { german: "Es ist... Uhr.", english: "It is... o'clock.", source: "Folge 9", type: "phrase", example: null },
+                { german: "der Arzt, -e", english: "the doctor (m.), -s", source: "Folge 10", type: "vocab", example: "Ich gehe zum Arzt." },
+                { german: "die Ärztin, -nen", english: "the doctor (f.), -s", source: "Folge 10", type: "vocab", example: "Frau Dr. Müller ist Ärztin." },
+                { german: "krank", english: "sick", source: "Folge 10", type: "vocab", example: "Ich bin krank." },
+                { german: "der Körper, -", english: "the body, -ies", source: "Folge 10", type: "vocab", example: "Mein ganzer Körper tut weh." },
+                { german: "der Kopf, -e", english: "the head, -s", source: "Folge 10", type: "vocab", example: "Mein Kopf tut weh." },
+                { german: "der Arm, -e", english: "the arm, -s", source: "Folge 10", type: "vocab", example: "Mein rechter Arm ist gebrochen." },
+                { german: "das Bein, -e", english: "the leg, -s", source: "Folge 10", type: "vocab", example: "Das linke Bein tut weh." },
+                { german: "der Bauch, -e", english: "the stomach, -s", source: "Folge 10", type: "vocab", example: "Ich habe Bauchschmerzen." },
+                { german: "der Schmerz, -en", english: "the pain, -s", source: "Folge 10", type: "vocab", example: "Ich habe Schmerzen." },
+                { german: "Ich habe Kopfschmerzen.", english: "I have a headache.", source: "Folge 10", "type": "phrase", example: null },
+                { german: "Mir tut... weh.", english: "My... hurts.", source: "Folge 10", type: "phrase", example: null },
+                { german: "Was fehlt Ihnen?", english: "What's wrong? (formal, to patient)", source: "Folge 10", type: "phrase", example: null },
+                { german: "Gute Besserung!", english: "Get well soon!", source: "Folge 10", type: "phrase", example: null },
+                { german: "der Hals, -e", english: "the throat, -s", source: "Folge 10", type: "vocab", example: "Ich habe Halsschmerzen." },
+                { german: "der Rücken, -", english: "the back, -s", source: "Folge 10", "type": "vocab", example: "Mein Rücken tut weh." },
+                { german: "Ich habe Halsschmerzen.", english: "I have a sore throat.", source: "Folge 10", "type": "phrase", example: null },
 
                 // Folge 11-12: Work & Daily Routine
-                { german: "arbeiten", english: "to work", source: "Folge 11", type: "vocab" },
-                { german: "der Beruf, -e", english: "the profession, -s", source: "Folge 11", type: "vocab" },
-                { german: "Was sind Sie von Beruf?", english: "What is your profession? (formal)", source: "Folge 11", type: "phrase" },
-                { german: "Ich bin...", english: "I am... (profession)", source: "Folge 11", type: "phrase" },
-                { german: "der Kellner, -", english: "the waiter, -s", source: "Folge 11", type: "vocab" },
-                { german: "die Kellnerin, -nen", english: "the waitress, -es", source: "Folge 11", type: "vocab" },
-                { german: "der Lehrer, -", english: "the teacher (m.), -s", source: "Folge 11", type: "vocab" },
-                { german: "die Lehrerin, -nen", english: "the teacher (f.), -s", source: "Folge 11", type: "vocab" },
-                { german: "der Verkäufer, -", english: "the salesperson (m.), -s", source: "Folge 11", type: "vocab" },
-                { german: "die Verkäuferin, -nen", english: "the salesperson (f.), -s", source: "Folge 11", type: "vocab" },
-                { german: "anrufen", english: "to call (on the phone)", source: "Folge 12", type: "vocab" },
-                { german: "einkaufen", english: "to go shopping (groceries)", source: "Folge 12", type: "vocab" },
-                { german: "aufstehen", english: "to get up", source: "Folge 12", type: "vocab" },
-                { german: "der Wecker, -", english: "the alarm clock, -s", source: "Folge 12", type: "vocab" },
-                { german: "frühstücken", english: "to eat breakfast", source: "Folge 12", type: "vocab" },
-                { german: "Ich stehe um 7 Uhr auf.", english: "I get up at 7 o'clock.", source: "Folge 12", "type": "phrase" },
-                { german: "Ich rufe dich an.", english: "I'll call you.", source: "Folge 12", type: "phrase" },
-                { german: "der Tag, -e", english: "the day, -s", source: "Folge 12", type: "vocab" },
-                { german: "der Morgen, -", english: "the morning, -s", source: "Folge 12", type: "vocab" },
-                { german: "der Abend, -e", english: "the evening, -s", source: "Folge 12", type: "vocab" },
-                { german: "die Nacht, -e", english: "the night, -s", source: "Folge 12", type: "vocab" },
-                { german: "ins Bett gehen", english: "to go to bed", source: "Folge 12", type: "phrase" },
-                { german: "Ich gehe um 22 Uhr ins Bett.", english: "I go to bed at 10 p.m.", source: "Folge 12", type: "phrase" },
+                { german: "arbeiten", english: "to work", source: "Folge 11", type: "vocab", example: "Ich arbeite bei einer Bank." },
+                { german: "der Beruf, -e", english: "the profession, -s", source: "Folge 11", type: "vocab", example: "Was ist dein Beruf?" },
+                { german: "Was sind Sie von Beruf?", english: "What is your profession? (formal)", source: "Folge 11", type: "phrase", example: null },
+                { german: "Ich bin...", english: "I am... (profession)", source: "Folge 11", type: "phrase", example: null },
+                { german: "der Kellner, -", english: "the waiter, -s", source: "Folge 11", type: "vocab", example: "Der Kellner bringt die Speisekarte." },
+                { german: "die Kellnerin, -nen", english: "the waitress, -es", source: "Folge 11", type: "vocab", example: "Die Kellnerin ist sehr nett." },
+                { german: "der Lehrer, -", english: "the teacher (m.), -s", source: "Folge 11", type: "vocab", example: "Mein Lehrer heißt Herr Schmidt." },
+                { german: "die Lehrerin, -nen", english: "the teacher (f.), -s", source: "Folge 11", type: "vocab", example: "Die Lehrerin erklärt die Grammatik." },
+                { german: "der Verkäufer, -", english: "the salesperson (m.), -s", source: "Folge 11", type: "vocab", example: "Der Verkäufer hilft mir." },
+                { german: "die Verkäuferin, -nen", english: "the salesperson (f.), -s", source: "Folge 11", type: "vocab", example: "Die Verkäuferin arbeitet im Supermarkt." },
+                { german: "anrufen", english: "to call (on the phone)", source: "Folge 12", type: "vocab", example: "Ich rufe dich morgen an." },
+                { german: "einkaufen", english: "to go shopping (groceries)", source: "Folge 12", type: "vocab", example: "Am Samstag kaufe ich ein." },
+                { german: "aufstehen", english: "to get up", source: "Folge 12", type: "vocab", example: "Ich stehe um 7 Uhr auf." },
+                { german: "der Wecker, -", english: "the alarm clock, -s", source: "Folge 12", type: "vocab", example: "Der Wecker klingelt." },
+                { german: "frühstücken", english: "to eat breakfast", source: "Folge 12", type: "vocab", example: "Wir frühstücken um 8 Uhr." },
+                { german: "Ich stehe um 7 Uhr auf.", english: "I get up at 7 o'clock.", source: "Folge 12", "type": "phrase", example: null },
+                { german: "Ich rufe dich an.", english: "I'll call you.", source: "Folge 12", type: "phrase", example: null },
+                { german: "der Tag, -e", english: "the day, -s", source: "Folge 12", type: "vocab", example: "Heute ist ein schöner Tag." },
+                { german: "der Morgen, -", english: "the morning, -s", source: "Folge 12", type: "vocab", example: "Guten Morgen!" },
+                { german: "der Abend, -e", english: "the evening, -s", source: "Folge 12", type: "vocab", example: "Am Abend sehe ich fern." },
+                { german: "die Nacht, -e", english: "the night, -s", source: "Folge 12", type: "vocab", example: "Gute Nacht!" },
+                { german: "ins Bett gehen", english: "to go to bed", source: "Folge 12", type: "phrase", example: null },
+                { german: "Ich gehe um 22 Uhr ins Bett.", english: "I go to bed at 10 p.m.", source: "Folge 12", type: "phrase", example: null },
                 
                 // Folge 13-14: Time & Hobbies
-                { german: "der Tag, -e", english: "the day, -s", source: "Folge 13", type: "vocab" },
-                { german: "der Morgen, -", english: "the morning, -s", source: "Folge 13", type: "vocab" },
-                { german: "der Abend, -e", english: "the evening, -s", source: "Folge 13", type: "vocab" },
-                { german: "heute", english: "today", source: "Folge 13", type: "vocab" },
-                { german: "morgen", english: "tomorrow", source: "Folge 13", type: "vocab" },
-                { german: "gestern", english: "yesterday", source: "Folge 13", type: "vocab" },
-                { german: "das Hobby, -s", english: "the hobby, -ies", source: "Folge 14", type: "vocab" },
-                { german: "lesen", english: "to read", source: "Folge 14", type: "vocab" },
-                { german: "fernsehen", english: "to watch TV", source: "Folge 14", type: "vocab" },
-                { german: "das Buch, -er", english: "the book, -s", source: "Folge 14", type: "vocab" },
-                { german: "die Musik", english: "the music", source: "Folge 14", type: "vocab" },
-                { german: "schwimmen", english: "to swim", source: "Folge 14", type: "vocab" },
-                { german: "kochen", english: "to cook", source: "Folge 14", type: "vocab" },
-                { german: "der Freund, -e", english: "the friend (m.), -s", source: "Folge 14", type: "vocab" },
-                { german: "die Freundin, -nen", english: "the friend (f.), -s", source: "Folge 14", type: "vocab" },
-                { german: "Was machst du gern?", english: "What do you like to do?", source: "Folge 14", type: "phrase" },
-                { german: "Ich spiele gern Fußball.", english: "I like to play soccer.", source: "Folge 14", "type": "phrase" },
-                { german: "Ich höre gern Musik.", english: "I like to listen to music.", source: "Folge 14", type: "phrase" },
-                { german: "Hast du Zeit?", english: "Do you have time?", source: "Folge 14", type: "phrase" },
-                { german: "Wann treffen wir uns?", english: "When are we meeting?", source: "Folge 14", type: "phrase" },
-                { german: "der Montag", english: "Monday", source: "Folge 13", type: "vocab" },
-                { german: "der Dienstag", english: "Tuesday", source: "Folge 13", type: "vocab" },
-                { german: "der Mittwoch", english: "Wednesday", source: "Folge 13", type: "vocab" },
-                { german: "der Donnerstag", english: "Thursday", source: "Folge 13", type: "vocab" },
-                { german: "der Freitag", english: "Friday", source: "Folge 13", type: "vocab" },
-                { german: "der Samstag", english: "Saturday", source: "Folge 13", type: "vocab" },
-                { german: "der Sonntag", english: "Sunday", source: "Folge 13", type: "vocab" },
-                { german: "die Woche, -n", english: "the week, -s", source: "Folge 13", type: "vocab" },
-                { german: "das Wochenende, -n", english: "the weekend, -s", source: "Folge 13", type: "vocab" },
-                { german: "Am Montag...", english: "On Monday...", source: "Folge 13", type: "phrase" },
-                { german: "Am Wochenende...", english: "On the weekend...", source: "Folge 13", type: "phrase" },
-                { german: "Freunde treffen", english: "to meet friends", source: "Folge 14", type: "phrase" },
+                { german: "der Tag, -e", english: "the day, -s", source: "Folge 13", type: "vocab", example: "Die Woche hat sieben Tage." },
+                { german: "der Morgen, -", english: "the morning, -s", source: "Folge 13", type: "vocab", example: "Ich arbeite am Morgen." },
+                { german: "der Abend, -e", english: "the evening, -s", source: "Folge 13", type: "vocab", example: "Was machst du am Abend?" },
+                { german: "heute", english: "today", source: "Folge 13", type: "vocab", example: "Was machst du heute?" },
+                { german: "morgen", english: "tomorrow", source: "Folge 13", type: "vocab", example: "Morgen habe ich frei." },
+                { german: "gestern", english: "yesterday", source: "Folge 13", type: "vocab", example: "Gestern war ich im Kino." },
+                { german: "das Hobby, -s", english: "the hobby, -ies", source: "Folge 14", type: "vocab", example: "Was sind deine Hobbys?" },
+                { german: "lesen", english: "to read", source: "Folge 14", type: "vocab", example: "Ich lese gern Bücher." },
+                { german: "fernsehen", english: "to watch TV", source: "Folge 14", type: "vocab", example: "Er sieht gern fern." },
+                { german: "das Buch, -er", english: "the book, -s", source: "Folge 14", type: "vocab", example: "Ich lese ein Buch." },
+                { german: "die Musik", english: "the music", source: "Folge 14", type: "vocab", example: "Ich höre gern Musik." },
+                { german: "schwimmen", english: "to swim", source: "Folge 14", type: "vocab", example: "Im Sommer schwimme ich gern." },
+                { german: "kochen", english: "to cook", source: "Folge 14", type: "vocab", example: "Ich koche gern Pasta." },
+                { german: "der Freund, -e", english: "the friend (m.), -s", source: "Folge 14", type: "vocab", example: "Das ist mein Freund Paul." },
+                { german: "die Freundin, -nen", english: "the friend (f.), -s", source: "Folge 14", type: "vocab", example: "Ich treffe meine Freundin." },
+                { german: "Was machst du gern?", english: "What do you like to do?", source: "Folge 14", type: "phrase", example: null },
+                { german: "Ich spiele gern Fußball.", english: "I like to play soccer.", source: "Folge 14", "type": "phrase", example: null },
+                { german: "Ich höre gern Musik.", english: "I like to listen to music.", source: "Folge 14", type: "phrase", example: null },
+                { german: "Hast du Zeit?", english: "Do you have time?", source: "Folge 14", type: "phrase", example: null },
+                { german: "Wann treffen wir uns?", english: "When are we meeting?", source: "Folge 14", type: "phrase", example: null },
+                { german: "der Montag", english: "Monday", source: "Folge 13", type: "vocab", example: "Am Montag beginnt die Woche." },
+                { german: "der Dienstag", english: "Tuesday", source: "Folge 13", type: "vocab", example: "Am Dienstag habe ich einen Termin." },
+                { german: "der Mittwoch", english: "Wednesday", source: "Folge 13", type: "vocab", example: "Am Mittwoch gehe ich schwimmen." },
+                { german: "der Donnerstag", english: "Thursday", source: "Folge 13", type: "vocab", example: "Am Donnerstag lerne ich Deutsch." },
+                { german: "der Freitag", english: "Friday", source: "Folge 13", type: "vocab", example: "Am Freitag treffe ich Freunde." },
+                { german: "der Samstag", english: "Saturday", source: "Folge 13", type: "vocab", example: "Am Samstag kaufe ich ein." },
+                { german: "der Sonntag", english: "Sunday", source: "Folge 13", type: "vocab", example: "Am Sonntag schlafe ich lange." },
+                { german: "die Woche, -n", english: "the week, -s", source: "Folge 13", type: "vocab", example: "Die Woche hat sieben Tage." },
+                { german: "das Wochenende, -n", english: "the weekend, -s", source: "Folge 13", type: "vocab", example: "Was machst du am Wochenende?" },
+                { german: "Am Montag...", english: "On Monday...", source: "Folge 13", type: "phrase", example: null },
+                { german: "Am Wochenende...", english: "On the weekend...", source: "Folge 13", type: "phrase", example: null },
+                { german: "Freunde treffen", english: "to meet friends", source: "Folge 14", type: "phrase", example: null },
 
                 // Folge 15-16: Weather & Modal Verbs
-                { german: "Die Sonne scheint.", english: "The sun is shining.", source: "Folge 15", "type": "phrase" },
-                { german: "kalt", english: "cold", source: "Folge 15", type: "vocab" },
-                { german: "warm", english: "warm", source: "Folge 15", type: "vocab" },
-                { german: "Wie ist das Wetter?", english: "How is the weather?", source: "Folge 15", type: "phrase" },
-                { german: "können", english: "to be able to, can", source: "Folge 16", type: "vocab" },
-                { german: "müssen", english: "to have to, must", source: "Folge 16", type: "vocab" },
-                { german: "wollen", english: "to want to", source: "Folge 16", type: "vocab" },
-                { german: "möchten", english: "would like to", source: "Folge 16", type: "vocab" },
-                { german: "Ich kann Deutsch sprechen.", english: "I can speak German.", source: "Folge 16", "type": "phrase" },
-                { german: "Ich muss arbeiten.", english: "I have to work.", source: "Folge 16", "type": "phrase" },
-                { german: "Ich will schlafen.", english: "I want to sleep.", source: "Folge 16", "type": "phrase" },
-                { german: "Ich möchte einen Kaffee.", english: "I would like a coffee.", source: "Folge 16", type: "phrase" },
-                { german: "dürfen", english: "to be allowed to, may", source: "Folge 16", type: "vocab" },
-                { german: "Darf ich...?", english: "May I...?", source: "Folge 16", type: "phrase" },
-                { german: "Hier darf man nicht rauchen.", english: "One is not allowed to smoke here.", source: "Folge 16", type: "phrase" },
+                { german: "Die Sonne scheint.", english: "The sun is shining.", source: "Folge 15", "type": "phrase", example: null },
+                { german: "kalt", english: "cold", source: "Folge 15", type: "vocab", example: "Heute ist es kalt." },
+                { german: "warm", english: "warm", source: "Folge 15", type: "vocab", example: "Im Sommer ist es warm." },
+                { german: "Wie ist das Wetter?", english: "How is the weather?", source: "Folge 15", type: "phrase", example: null },
+                { german: "können", english: "to be able to, can", source: "Folge 16", type: "vocab", example: "Ich kann Deutsch sprechen." },
+                { german: "müssen", english: "to have to, must", source: "Folge 16", type: "vocab", example: "Ich muss arbeiten." },
+                { german: "wollen", english: "to want to", source: "Folge 16", type: "vocab", example: "Ich will schlafen." },
+                { german: "möchten", english: "would like to", source: "Folge 16", type: "vocab", example: "Ich möchte einen Kaffee." },
+                { german: "Ich kann Deutsch sprechen.", english: "I can speak German.", source: "Folge 16", "type": "phrase", example: null },
+                { german: "Ich muss arbeiten.", english: "I have to work.", source: "Folge 16", "type": "phrase", example: null },
+                { german: "Ich will schlafen.", english: "I want to sleep.", source: "Folge 16", "type": "phrase", example: null },
+                { german: "Ich möchte einen Kaffee.", english: "I would like a coffee.", source: "Folge 16", type: "phrase", example: null },
+                { german: "dürfen", english: "to be allowed to, may", source: "Folge 16", type: "vocab", example: "Darf ich hier rauchen?" },
+                { german: "Darf ich...?", english: "May I...?", source: "Folge 16", type: "phrase", example: null },
+                { german: "Hier darf man nicht rauchen.", english: "One is not allowed to smoke here.", source: "Folge 16", type: "phrase", example: null },
                 
                 // Folge 17-18: Clothing & Transport
-                { german: "die Kleidung", english: "the clothing", source: "Folge 17", type: "vocab" },
-                { german: "die Hose, -n", english: "the pants, -", source: "Folge 17", type: "vocab" },
-                { german: "das T-Shirt, -s", english: "the T-shirt, -s", source: "Folge 17", type: "vocab" },
-                { german: "der Schuh, -e", english: "the shoe, -s", source: "Folge 17", type: "vocab" },
-                { german: "die Jacke, -n", english: "the jacket, -s", source: "Folge 17", type: "vocab" },
-                { german: "der Pullover, -", english: "the sweater, -s", source: "Folge 17", type: "vocab" },
-                { german: "tragen", english: "to wear / to carry", source: "Folge 17", type: "vocab" },
-                { german: "Ich trage eine Hose.", english: "I am wearing pants.", source: "Folge 17", "type": "phrase" },
-                { german: "Was trägst du heute?", english: "What are you wearing today?", source: "Folge 17", type: "phrase" },
-                { german: "der Bahnhof, -e", english: "the train station, -s", source: "Folge 18", type: "vocab" },
-                { german: "der Zug, -e", english: "the train, -s", source: "Folge 18", type: "vocab" },
-                { german: "fahren", english: "to drive, to go (by vehicle)", source: "Folge 18", type: "vocab" },
-                { german: "die Fahrkarte, -n", english: "the ticket, -s", source: "Folge 18", type: "vocab" },
-                { german: "das Auto, -s", english: "the car, -s", source: "Folge 18", type: "vocab" },
-                { german: "das Fahrrad, -er", english: "the bicycle, -s", source: "Folge 18", type: "vocab" },
-                { german: "die U-Bahn, -en", english: "the subway, -s", source: "Folge 18", type: "vocab" },
-                { german: "Ich fahre mit dem Bus.", english: "I'm going by bus.", source: "Folge 18", "type": "phrase" },
-                { german: "Wo ist der Bahnhof?", english: "Where is the train station?", source: "Folge 18", type: "phrase" },
-                { german: "brauchen", english: "to need", source: "Folge 18", type: "vocab" },
-                { german: "Ich brauche eine Fahrkarte.", english: "I need a ticket.", source: "Folge 18", type: "phrase" },
-                { german: "Wo fährt der Bus ab?", english: "Where does the bus depart from?", source: "Folge 18", type: "phrase" },
-                { german: "abfahren", english: "to depart", source: "Folge 18", type: "vocab" },
-                { german: "ankommen", english: "to arrive", source: "Folge 18", type: "vocab" },
-                { german: "umsteigen", english: "to transfer (vehicles)", source: "Folge 18", type: "vocab" },
-                { german: "Der Zug kommt an.", english: "The train is arriving.", source: "Folge 18", type: "phrase" },
-                { german: "Ich muss umsteigen.", english: "I have to transfer.", source: "Folge 18", type: "phrase" },
+                { german: "die Kleidung", english: "the clothing", source: "Folge 17", type: "vocab", example: "Die Kleidung ist im Schrank." },
+                { german: "die Hose, -n", english: "the pants, -", source: "Folge 17", type: "vocab", example: "Ich trage eine blaue Hose." },
+                { german: "das T-Shirt, -s", english: "the T-shirt, -s", source: "Folge 17", type: "vocab", example: "Das T-Shirt ist weiß." },
+                { german: "der Schuh, -e", english: "the shoe, -s", source: "Folge 17", type: "vocab", example: "Ich brauche neue Schuhe." },
+                { german: "die Jacke, -n", english: "the jacket, -s", source: "Folge 17", type: "vocab", example: "Meine Jacke ist rot." },
+                { german: "der Pullover, -", english: "the sweater, -s", source: "Folge 17", type: "vocab", example: "Im Winter trage ich einen Pullover." },
+                { german: "tragen", english: "to wear / to carry", source: "Folge 17", type: "vocab", example: "Was trägst du heute?" },
+                { german: "Ich trage eine Hose.", english: "I am wearing pants.", source: "Folge 17", "type": "phrase", example: null },
+                { german: "Was trägst du heute?", english: "What are you wearing today?", source: "Folge 17", type: "phrase", example: null },
+                { german: "der Bahnhof, -e", english: "the train station, -s", source: "Folge 18", type: "vocab", example: "Wo ist der Bahnhof?" },
+                { german: "der Zug, -e", english: "the train, -s", source: "Folge 18", type: "vocab", example: "Der Zug fährt nach Berlin." },
+                { german: "fahren", english: "to drive, to go (by vehicle)", source: "Folge 18", type: "vocab", example: "Ich fahre mit dem Bus." },
+                { german: "die Fahrkarte, -n", english: "the ticket, -s", source: "Folge 18", type: "vocab", example: "Ich brauche eine Fahrkarte." },
+                { german: "das Auto, -s", english: "the car, -s", source: "Folge 18", type: "vocab", example: "Ich fahre mit dem Auto." },
+                { german: "das Fahrrad, -er", english: "the bicycle, -s", source: "Folge 18", type: "vocab", example: "Er fährt mit dem Fahrrad." },
+                { german: "die U-Bahn, -en", english: "the subway, -s", source: "Folge 18", type: "vocab", example: "Ich nehme die U-Bahn." },
+                { german: "Ich fahre mit dem Bus.", english: "I'm going by bus.", source: "Folge 18", "type": "phrase", example: null },
+                { german: "Wo ist der Bahnhof?", english: "Where is the train station?", source: "Folge 18", type: "phrase", example: null },
+                { german: "brauchen", english: "to need", source: "Folge 18", type: "vocab", example: "Ich brauche Hilfe." },
+                { german: "Ich brauche eine Fahrkarte.", english: "I need a ticket.", source: "Folge 18", type: "phrase", example: null },
+                { german: "Wo fährt der Bus ab?", english: "Where does the bus depart from?", source: "Folge 18", type: "phrase", example: null },
+                { german: "abfahren", english: "to depart", source: "Folge 18", type: "vocab", example: "Der Bus fährt um 10 Uhr ab." },
+                { german: "ankommen", english: "to arrive", source: "Folge 18", type: "vocab", example: "Der Zug kommt in 5 Minuten an." },
+                { german: "umsteigen", english: "to transfer (vehicles)", source: "Folge 18", type: "vocab", example: "In Köln muss ich umsteigen." },
+                { german: "Der Zug kommt an.", english: "The train is arriving.", source: "Folge 18", type: "phrase", example: null },
+                { german: "Ich muss umsteigen.", english: "I have to transfer.", source: "Folge 18", type: "phrase", example: null },
 
                 // Folge 19-20: Directions & Places
-                { german: "die Stadt, -e", english: "the city, -ies", source: "Folge 19", type: "vocab" },
-                { german: "die Ampel, -n", english: "the traffic light, -s", source: "Folge 19", type: "vocab" },
-                { german: "geradeaus", english: "straight ahead", source: "Folge 19", type: "vocab" },
-                { german: "links", english: "left", source: "Folge 19", type: "vocab" },
-                { german: "rechts", english: "right", source: "Folge 19", type: "vocab" },
-                { german: "Entschuldigung, ...", english: "Excuse me, ...", source: "Folge 19", type: "phrase" },
-                { german: "Wie komme ich zu...?", english: "How do I get to...?", source: "Folge 19", type: "phrase" },
-                { german: "Gehen Sie geradeaus.", english: "Go straight ahead. (formal)", source: "Folge 19", type: "phrase" },
-                { german: "Gehen Sie nach links.", english: "Go left. (formal)", source: "Folge 19", type: "phrase" },
-                { german: "das Restaurant, -s", english: "the restaurant, -s", source: "Folge 20", type: "vocab" },
-                { german: "die Speisekarte, -n", english: "the menu, -s", source: "Folge 20", type: "vocab" },
-                { german: "bestellen", english: "to order", source: "Folge 20", type: "vocab" },
-                { german: "bezahlen", english: "to pay", source: "Folge 20", type: "vocab" },
-                { german: "zusammen oder getrennt?", english: "together or separate? (paying)", source: "Folge 20", type: "phrase" },
-                { german: "Ich hätte gern...", english: "I would like to have...", source: "Folge 20", type: "phrase" },
-                { german: "Die Rechnung, bitte.", english: "The check, please.", source: "Folge 20", type: "phrase" },
-                { german: "Das macht...", english: "That makes... (total cost)", source: "Folge 20", type: "phrase" },
-                { german: "Stimmt so.", english: "Keep the change. (lit. 'It's fine so.')", source: "Folge 20", type: "phrase" },
-                { german: "das Trinkgeld, -er", english: "the tip, -s", source: "Folge 20", "type": "vocab" },
-                { german: "Guten Appetit!", english: "Enjoy your meal!", source: "Folge 20", "type": "phrase" },
-                { german: "Danke, gleichfalls!", english: "Thanks, likewise!", source: "Folge 20", "type": "phrase" },
-                { german: "das Museum, Museen", english: "the museum, -s", source: "Folge 19", type: "vocab" },
-                { german: "die Bank, -en", english: "the bank, -s", source: "Folge 19", type: "vocab" },
-                { german: "das Krankenhaus, -er", english: "the hospital, -s", source: "Folge 19", "type": "vocab" },
-                { german: "die Apotheke, -n", english: "the pharmacy, -ies", source: "Folge 19", "type": "vocab" },
+                { german: "die Stadt, -e", english: "the city, -ies", source: "Folge 19", type: "vocab", example: "Berlin ist eine große Stadt." },
+                { german: "die Ampel, -n", english: "the traffic light, -s", source: "Folge 19", type: "vocab", example: "Gehen Sie bis zur Ampel." },
+                { german: "geradeaus", english: "straight ahead", source: "Folge 19", type: "vocab", example: "Gehen Sie immer geradeaus." },
+                { german: "links", english: "left", source: "Folge 19", type: "vocab", example: "Gehen Sie hier links." },
+                { german: "rechts", english: "right", source: "Folge 19", type: "vocab", example: "Gehen Sie die nächste Straße rechts." },
+                { german: "Entschuldigung, ...", english: "Excuse me, ...", source: "Folge 19", type: "phrase", example: null },
+                { german: "Wie komme ich zu...?", english: "How do I get to...?", source: "Folge 19", type: "phrase", example: null },
+                { german: "Gehen Sie geradeaus.", english: "Go straight ahead. (formal)", source: "Folge 19", type: "phrase", example: null },
+                { german: "Gehen Sie nach links.", english: "Go left. (formal)", source: "Folge 19", type: "phrase", example: null },
+                { german: "das Restaurant, -s", english: "the restaurant, -s", source: "Folge 20", type: "vocab", example: "Wir essen in einem Restaurant." },
+                { german: "die Speisekarte, -n", english: "the menu, -s", source: "Folge 20", type: "vocab", example: "Die Speisekarte, bitte." },
+                { german: "bestellen", english: "to order", source: "Folge 20", type: "vocab", example: "Ich möchte einen Salat bestellen." },
+                { german: "bezahlen", english: "to pay", source: "Folge 20", type: "vocab", example: "Ich möchte bitte bezahlen." },
+                { german: "zusammen oder getrennt?", english: "together or separate? (paying)", source: "Folge 20", type: "phrase", example: null },
+                { german: "Ich hätte gern...", english: "I would like to have...", source: "Folge 20", type: "phrase", example: null },
+                { german: "Die Rechnung, bitte.", english: "The check, please.", source: "Folge 20", type: "phrase", example: null },
+                { german: "Das macht...", english: "That makes... (total cost)", source: "Folge 20", type: "phrase", example: null },
+                { german: "Stimmt so.", english: "Keep the change. (lit. 'It's fine so.')", source: "Folge 20", type: "phrase", example: null },
+                { german: "das Trinkgeld, -er", english: "the tip, -s", source: "Folge 20", "type": "vocab", example: "In Deutschland gibt man Trinkgeld." },
+                { german: "Guten Appetit!", english: "Enjoy your meal!", source: "Folge 20", "type": "phrase", example: null },
+                { german: "Danke, gleichfalls!", english: "Thanks, likewise!", source: "Folge 20", "type": "phrase", example: null },
+                { german: "das Museum, Museen", english: "the museum, -s", source: "Folge 19", type: "vocab", example: "Ich gehe ins Museum." },
+                { german: "die Bank, -en", english: "the bank, -s", source: "Folge 19", type: "vocab", example: "Die Bank ist links." },
+                { german: "das Krankenhaus, -er", english: "the hospital, -s", source: "Folge 19", "type": "vocab", example: "Er ist im Krankenhaus." },
+                { german: "die Apotheke, -n", english: "the pharmacy, -ies", source: "Folge 19", "type": "vocab", example: "Ich brauche Medikamente aus der Apotheke." },
 
                 // Folge 21-22: Professions & Office
-                { german: "das Büro, -s", english: "the office, -s", source: "Folge 21", type: "vocab" },
-                { german: "der Kollege, -n", english: "the colleague (m.), -s", source: "Folge 21", type: "vocab" },
-                { german: "die Kollegin, -nen", english: "the colleague (f.), -s", source: "Folge 21", type: "vocab" },
-                { german: "der Chef, -s", english: "the boss (m.), -es", source: "Folge 21", type: "vocab" },
-                { german: "die Chefin, -nen", english: "the boss (f.), -es", source: "Folge 21", type: "vocab" },
-                { german: "der Computer, -", english: "the computer, -s", source: "Folge 22", type: "vocab" },
-                { german: "die E-Mail, -s", english: "the e-mail, -s", source: "Folge 22", type: "vocab" },
-                { german: "schreiben", english: "to write", source: "Folge 22", type: "vocab" },
-                { german: "das Telefon, -e", english: "the telephone, -s", source: "Folge 22", type: "vocab" },
-                { german: "telefonieren", english: "to talk on the phone", source: "Folge 22", type: "vocab" },
-                { german: "eine E-Mail schreiben", english: "to write an e-mail", source: "Folge 22", type: "phrase" },
-                { german: "Ich arbeite als...", english: "I work as a...", source: "Folge 21", type: "phrase" },
-                { german: "der Termin, -e", english: "the appointment, -s", source: "Folge 22", type: "vocab" },
-                { german: "einen Termin haben", english: "to have an appointment", source: "Folge 22", type: "phrase" },
-                { german: "einen Termin vereinbaren", english: "to make an appointment", source: "Folge 22", type: "phrase" },
-                { german: "Können wir einen Termin vereinbaren?", english: "Can we make an appointment?", source: "Folge 22", type: "phrase" },
-                { german: "Wann haben Sie Zeit?", english: "When do you have time? (formal)", source: "Folge 22", type: "phrase" },
-                { german: "Passt es Ihnen um 10 Uhr?", english: "Does 10 o'clock work for you?", source: "Folge 22", type: "phrase" },
-                { german: "Ja, das passt.", english: "Yes, that works.", source: "Folge 22", type: "phrase" },
-                { german: "Nein, das geht leider nicht.", english: "No, that doesn't work, unfortunately.", source: "Folge 22", type: "phrase" },
+                { german: "das Büro, -s", english: "the office, -s", source: "Folge 21", type: "vocab", example: "Ich arbeite im Büro." },
+                { german: "der Kollege, -n", english: "the colleague (m.), -s", source: "Folge 21", type: "vocab", example: "Mein Kollege ist nett." },
+                { german: "die Kollegin, -nen", english: "the colleague (f.), -s", source: "Folge 21", type: "vocab", example: "Das ist meine Kollegin, Frau Meier." },
+                { german: "der Chef, -s", english: "the boss (m.), -es", source: "Folge 21", type: "vocab", example: "Mein Chef ist nicht da." },
+                { german: "die Chefin, -nen", english: "the boss (f.), -es", source: "Folge 21", type: "vocab", example: "Die Chefin hat einen Termin." },
+                { german: "der Computer, -", english: "the computer, -s", source: "Folge 22", type: "vocab", example: "Ich arbeite am Computer." },
+                { german: "die E-Mail, -s", english: "the e-mail, -s", source: "Folge 22", type: "vocab", example: "Ich schreibe eine E-Mail." },
+                { german: "schreiben", english: "to write", source: "Folge 22", type: "vocab", example: "Er schreibt einen Brief." },
+                { german: "das Telefon, -e", english: "the telephone, -s", source: "Folge 22", type: "vocab", example: "Das Telefon klingelt." },
+                { german: "telefonieren", english: "to talk on the phone", source: "Folge 22", type: "vocab", example: "Ich telefoniere mit meiner Mutter." },
+                { german: "eine E-Mail schreiben", english: "to write an e-mail", source: "Folge 22", type: "phrase", example: null },
+                { german: "Ich arbeite als...", english: "I work as a...", source: "Folge 21", type: "phrase", example: null },
+                { german: "der Termin, -e", english: "the appointment, -s", source: "Folge 22", type: "vocab", example: "Ich habe einen Termin." },
+                { german: "einen Termin haben", english: "to have an appointment", source: "Folge 22", type: "phrase", example: null },
+                { german: "einen Termin vereinbaren", english: "to make an appointment", source: "Folge 22", type: "phrase", example: null },
+                { german: "Können wir einen Termin vereinbaren?", english: "Can we make an appointment?", source: "Folge 22", type: "phrase", example: null },
+                { german: "Wann haben Sie Zeit?", english: "When do you have time? (formal)", source: "Folge 22", type: "phrase", example: null },
+                { german: "Passt es Ihnen um 10 Uhr?", english: "Does 10 o'clock work for you?", source: "Folge 22", type: "phrase", example: null },
+                { german: "Ja, das passt.", english: "Yes, that works.", source: "Folge 22", type: "phrase", example: null },
+                { german: "Nein, das geht leider nicht.", english: "No, that doesn't work, unfortunately.", source: "Folge 22", type: "phrase", example: null },
 
                 // Folge 23-24: Past Tense (Perfekt)
-                { german: "haben", english: "to have (auxiliary verb)", source: "Folge 23", type: "vocab" },
-                { german: "sein", english: "to be (auxiliary verb)", source: "Folge 23", type: "vocab" },
-                { german: "gemacht", english: "done, made (past participle)", source: "Folge 23", type: "vocab" },
-                { german: "gekauft", english: "bought (past participle)", source: "Folge 23", type: "vocab" },
-                { german: "gelernt", english: "learned (past participle)", source: "Folge 23", type: "vocab" },
-                { german: "gearbeitet", english: "worked (past participle)", source: "Folge 23", type: "vocab" },
-                { german: "Ich habe... gemacht.", english: "I did/made...", source: "Folge 23", type: "phrase" },
-                { german: "Was hast du gemacht?", english: "What did you do?", source: "Folge 23", type: "phrase" },
-                { german: "gefahren", english: "driven, gone (past participle)", source: "Folge 24", type: "vocab" },
-                { german: "gekommen", english: "come (past participle)", source: "Folge 24", type: "vocab" },
-                { german: "gegangen", english: "gone, walked (past participle)", source: "Folge 24", type: "vocab" },
-                { german: "Ich bin... gefahren.", english: "I drove/went...", source: "Folge 24", type: "phrase" },
-                { german: "Er ist... gekommen.", english: "He came...", source: "Folge 24", type: "phrase" },
-                { german: "Wir sind... gegangen.", english: "We went/walked...", source: "Folge 24", type: "phrase" },
-                { german: "gesehen", english: "seen (past participle)", source: "Folge 23", type: "vocab" },
-                { german: "gelesen", english: "read (past participle)", source: "Folge 23", type: "vocab" },
-                { german: "geschlafen", english: "slept (past participle)", source: "Folge 23", type: "vocab" },
-                { german: "gegessen", english: "eaten (past participle)", source: "Folge 23", type: "vocab" },
-                { german: "getrunken", english: "drunk (past participle)", source: "Folge 23", type: "vocab" },
-                { german: "Ich habe einen Film gesehen.", english: "I watched a movie.", source: "Folge 23", type: "phrase" },
-                { german: "Er hat ein Buch gelesen.", english: "He read a book.", source: "Folge 23", "type": "phrase" },
-                { german: "Wir haben Pizza gegessen.", english: "We ate pizza.", source: "Folge 23", "type": "phrase" },
-                { german: "geblieben", english: "stayed (past participle)", source: "Folge 24", "type": "vocab" },
-                { german: "gereist", english: "traveled (past participle)", source: "Folge 24", "type": "vocab" },
-                { german: "Ich bin zu Hause geblieben.", english: "I stayed at home.", source: "Folge 24", "type": "phrase" },
-                { german: "Sie ist nach Berlin gereist.", english: "She traveled to Berlin.", source: "Folge 24", "type": "phrase" },
+                { german: "haben", english: "to have (auxiliary verb)", source: "Folge 23", type: "vocab", example: "Ich habe gearbeitet." },
+                { german: "sein", english: "to be (auxiliary verb)", source: "Folge 23", type: "vocab", example: "Ich bin gefahren." },
+                { german: "gemacht", english: "done, made (past participle)", source: "Folge 23", type: "vocab", example: "Was hast du gemacht?" },
+                { german: "gekauft", english: "bought (past participle)", source: "Folge 23", type: "vocab", example: "Ich habe Brot gekauft." },
+                { german: "gelernt", english: "learned (past participle)", source: "Folge 23", type: "vocab", example: "Er hat Deutsch gelernt." },
+                { german: "gearbeitet", english: "worked (past participle)", source: "Folge 23", type: "vocab", example: "Sie hat gestern gearbeitet." },
+                { german: "Ich habe... gemacht.", english: "I did/made...", source: "Folge 23", type: "phrase", example: null },
+                { german: "Was hast du gemacht?", english: "What did you do?", source: "Folge 23", type: "phrase", example: null },
+                { german: "gefahren", english: "driven, gone (past participle)", source: "Folge 24", type: "vocab", example: "Ich bin mit dem Bus gefahren." },
+                { german: "gekommen", english: "come (past participle)", source: "Folge 24", type: "vocab", example: "Er ist zu spät gekommen." },
+                { german: "gegangen", english: "gone, walked (past participle)", source: "Folge 24", type: "vocab", example: "Wir sind ins Kino gegangen." },
+                { german: "Ich bin... gefahren.", english: "I drove/went...", source: "Folge 24", type: "phrase", example: null },
+                { german: "Er ist... gekommen.", english: "He came...", source: "Folge 24", type: "phrase", example: null },
+                { german: "Wir sind... gegangen.", english: "We went/walked...", source: "Folge 24", type: "phrase", example: null },
+                { german: "gesehen", english: "seen (past participle)", source: "Folge 23", type: "vocab", example: "Ich habe einen Film gesehen." },
+                { german: "gelesen", english: "read (past participle)", source: "Folge 23", type: "vocab", example: "Er hat ein Buch gelesen." },
+                { german: "geschlafen", english: "slept (past participle)", source: "Folge 23", type: "vocab", example: "Ich habe gut geschlafen." },
+                { german: "gegessen", english: "eaten (past participle)", source: "Folge 23", type: "vocab", example: "Wir haben Pizza gegessen." },
+                { german: "getrunken", english: "drunk (past participle)", source: "Folge 23", type: "vocab", example: "Sie hat Kaffee getrunken." },
+                { german: "Ich habe einen Film gesehen.", english: "I watched a movie.", source: "Folge 23", type: "phrase", example: null },
+                { german: "Er hat ein Buch gelesen.", english: "He read a book.", source: "Folge 23", "type": "phrase", example: null },
+                { german: "Wir haben Pizza gegessen.", english: "We ate pizza.", source: "Folge 23", "type": "phrase", example: null },
+                { german: "geblieben", english: "stayed (past participle)", source: "Folge 24", "type": "vocab", example: "Ich bin zu Hause geblieben." },
+                { german: "gereist", english: "traveled (past participle)", source: "Folge 24", "type": "vocab", example: "Sie ist nach Berlin gereist." },
+                { german: "Ich bin zu Hause geblieben.", english: "I stayed at home.", source: "Folge 24", "type": "phrase", example: null },
+                { german: "Sie ist nach Berlin gereist.", english: "She traveled to Berlin.", source: "Folge 24", "type": "phrase", example: null },
 
                 // Folge 25-26: Party & Invitations
-                { german: "die Party, -s", english: "the party, -ies", source: "Folge 25", type: "vocab" },
-                { german: "feiern", english: "to celebrate", source: "Folge 25", type: "vocab" },
-                { german: "die Einladung, -en", english: "the invitation, -s", source: "Folge 25", type: "vocab" },
-                { german: "einladen", english: "to invite", source: "Folge 25", type: "vocab" },
-                { german: "Ich lade dich ein.", english: "I'm inviting you.", source: "Folge 25", type: "phrase" },
-                { german: "Kommst du zu meiner Party?", english: "Are you coming to my party?", source: "Folge 25", type: "phrase" },
-                { german: "Danke für die Einladung.", english: "Thanks for the invitation.", source: "Folge 25", type: "phrase" },
-                { german: "Gute Idee!", english: "Good idea!", source: "Folge 26", type: "phrase" },
-                { german: "Das ist nett.", english: "That is nice.", source: "Folge 26", type: "phrase" },
-                { german: "Leider keine Zeit.", english: "Unfortunately no time.", source: "Folge 26", type: "phrase" },
-                { german: "Vielleicht nächstes Mal.", english: "Maybe next time.", source: "Folge 26", type: "phrase" },
-                { german: "mitbringen", english: "to bring along", source: "Folge 26", type: "vocab" },
-                { german: "Was soll ich mitbringen?", english: "What should I bring?", source: "Folge 26", type: "phrase" },
+                { german: "die Party, -s", english: "the party, -ies", source: "Folge 25", type: "vocab", example: "Ich mache eine Party." },
+                { german: "feiern", english: "to celebrate", source: "Folge 25", type: "vocab", example: "Wir feiern meinen Geburtstag." },
+                { german: "die Einladung, -en", english: "the invitation, -s", source: "Folge 25", type: "vocab", example: "Danke für die Einladung." },
+                { german: "einladen", english: "to invite", source: "Folge 25", type: "vocab", example: "Ich lade dich zur Party ein." },
+                { german: "Ich lade dich ein.", english: "I'm inviting you.", source: "Folge 25", type: "phrase", example: null },
+                { german: "Kommst du zu meiner Party?", english: "Are you coming to my party?", source: "Folge 25", type: "phrase", example: null },
+                { german: "Danke für die Einladung.", english: "Thanks for the invitation.", source: "Folge 25", type: "phrase", example: null },
+                { german: "Gute Idee!", english: "Good idea!", source: "Folge 26", type: "phrase", example: null },
+                { german: "Das ist nett.", english: "That is nice.", source: "Folge 26", type: "phrase", example: null },
+                { german: "Leider keine Zeit.", english: "Unfortunately no time.", source: "Folge 26", type: "phrase", example: null },
+                { german: "Vielleicht nächstes Mal.", english: "Maybe next time.", source: "Folge 26", type: "phrase", example: null },
+                { german: "mitbringen", english: "to bring along", source: "Folge 26", type: "vocab", example: "Kannst du einen Salat mitbringen?" },
+                { german: "Was soll ich mitbringen?", english: "What should I bring?", source: "Folge 26", type: "phrase", example: null },
             ],
             grammar: [
                 {
@@ -879,6 +933,16 @@
             prevBtn.addEventListener('click', prevCard);
             shuffleBtn.addEventListener('click', filterAndShuffleDeck);
 
+            // --- New Listeners ---
+            speakBtnFront.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevents card from flipping
+                speakGerman(cardGerman.textContent);
+            });
+            speakBtnExample.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevents card from flipping
+                speakGerman(cardExample.textContent);
+            });
+
             // Chat listener
             chatForm.addEventListener('submit', handleChatSubmit);
 
@@ -917,6 +981,27 @@
                     initializeDialogue(); // Start the chat if it's the first time
                 }
             }
+        }
+        
+        // --- NEW FUNCTION ---
+        /**
+         * Speaks the given text in German using the Web Speech API
+         */
+        function speakGerman(text) {
+            if (typeof SpeechSynthesisUtterance === 'undefined') {
+                console.warn('Speech synthesis not supported in this browser.');
+                // We could show a modal here, but for now, we'll just log
+                return;
+            }
+            
+            // Cancel any previous speech to prevent overlap
+            speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'de-DE'; // Set language to German
+            utterance.rate = 0.9;     // Speak a bit slower for learners
+            
+            speechSynthesis.speak(utterance);
         }
 
         /**
@@ -980,6 +1065,15 @@
             const sourceText = `Source: ${currentCard.source}`;
             cardSourceFront.textContent = sourceText;
             cardSourceBack.textContent = sourceText;
+            
+            // --- New/Updated Logic for Example ---
+            if (currentCard.example) {
+                cardExample.textContent = currentCard.example;
+                cardExampleContainer.classList.remove('hidden');
+            } else {
+                cardExample.textContent = '';
+                cardExampleContainer.classList.add('hidden');
+            }
             
             progressText.textContent = `${state.currentCardIndex + 1} / ${state.currentDeck.length}`;
         }
@@ -1274,4 +1368,3 @@
     </script>
 </body>
 </html>
-
